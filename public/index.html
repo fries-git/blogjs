@@ -1,100 +1,193 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8" />
   <title>Mini Blog</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; background: #121212; color: #eee; }
-    h1 { text-align: center; color: #fff; }
-    form { background: #1e1e1e; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
-    input, textarea, button { width: 100%; margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; border: none; }
-    input, textarea { background: #2a2a2a; color: #eee; }
-    button { background: #4CAF50; color: white; cursor: pointer; margin-top: 1rem; }
-    button:hover { background: #45a049; }
-    .hidden { display: none; }
-    .post { background: #1e1e1e; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
-    .author { font-weight: bold; color: #90caf9; }
-    .timestamp { font-size: 0.8rem; color: #bbb; margin-bottom: 0.5rem; }
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; background:#0f1113; color:#e6eef3; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:1rem; }
+    h1 { margin:0; font-size:1.4rem; color:#fff; }
+    .card { background:#121417; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.6); }
+    input, textarea, button { width:100%; margin-top:8px; padding:10px; border-radius:8px; border:1px solid #202428; background:#0f1315; color:#e6eef3; }
+    .row { display:flex; gap:8px; align-items:center; }
+    .small { width:120px; flex:0 0 120px; }
+    .hidden { display:none; }
+    .post { margin-top:12px; padding:12px; border-radius:10px; background:#0f1315; opacity:0; transform:translateY(10px); animation:fadeIn .35s forwards; }
+    .meta { color:#98aFC7; font-size:.85rem; margin-bottom:8px; }
+    img.post-image { max-width:100%; border-radius:8px; margin-top:8px; }
+    #posts { margin-top:1rem; }
+    @keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
+    .controls { display:flex; gap:8px; }
+    button.ghost { background:transparent; border:1px solid #2a3238; color:#cfe5ff; padding:8px 12px; border-radius:8px; cursor:pointer; }
   </style>
 </head>
 <body>
-  <h1>My Blog</h1>
+  <header>
+    <h1>Mini Blog</h1>
+    <div id="userArea" class="row">
+      <div id="userName" style="font-weight:600;color:#9cd1ff"></div>
+      <div class="controls">
+        <button id="logoutBtn" class="ghost hidden">Logout</button>
+      </div>
+    </div>
+  </header>
 
-  <form id="authForm">
+  <section class="card" id="authCard">
     <h3 id="authTitle">Login</h3>
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-    <button type="button" id="toggleAuth">Create Account</button>
-  </form>
+    <div class="row">
+      <input id="username" placeholder="username">
+    </div>
+    <div class="row">
+      <input id="password" type="password" placeholder="password">
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button id="authSubmit">Login</button>
+      <button id="toggleAuth" class="ghost">Create account</button>
+    </div>
+  </section>
 
-  <form id="postForm" class="hidden">
-    <input type="text" id="author" placeholder="Your display name" required>
-    <textarea id="content" rows="4" placeholder="Write something..." required></textarea>
-    <button type="submit">Post</button>
-  </form>
+  <section class="card hidden" id="postCard">
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="font-weight:600" id="postAuthor">you</div>
+      <div style="color:#98aFC7;font-size:.85rem" id="postTime"></div>
+    </div>
+    <textarea id="content" rows="5" placeholder="Write in markdown..."></textarea>
+    <input type="file" id="image" accept="image/*">
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button id="postSubmit">Post</button>
+      <button id="previewBtn" class="ghost">Preview</button>
+    </div>
+    <div id="preview" class="hidden" style="margin-top:8px;padding:8px;border-radius:8px;background:#0b0d0f"></div>
+  </section>
 
   <div id="posts"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script>
+    // state
     let isSignup = false;
+    const $ = id => document.getElementById(id);
 
-    document.getElementById('toggleAuth').onclick = () => {
+    async function me() {
+      const r = await fetch('/me');
+      return r.ok ? r.json() : { user: null };
+    }
+
+    function showAuth(show) {
+      $('authCard').classList.toggle('hidden', !show);
+    }
+    function showPost(show) {
+      $('postCard').classList.toggle('hidden', !show);
+    }
+
+    async function refreshUI() {
+      const m = await me();
+      if (m.user) {
+        $('userName').textContent = m.user;
+        $('logoutBtn').classList.remove('hidden');
+        showAuth(false);
+        showPost(true);
+        $('postAuthor').textContent = m.user;
+      } else {
+        $('userName').textContent = '';
+        $('logoutBtn').classList.add('hidden');
+        showAuth(true);
+        showPost(false);
+      }
+    }
+
+    $('toggleAuth').addEventListener('click', () => {
       isSignup = !isSignup;
-      document.getElementById('authTitle').innerText = isSignup ? "Sign Up" : "Login";
-      document.querySelector('#authForm button[type="submit"]').innerText = isSignup ? "Sign Up" : "Login";
-      document.getElementById('toggleAuth').innerText = isSignup ? "Already have an account?" : "Create Account";
-    };
+      $('authTitle').innerText = isSignup ? 'Create account' : 'Login';
+      $('authSubmit').innerText = isSignup ? 'Sign up' : 'Login';
+      $('toggleAuth').innerText = isSignup ? 'Already have an account?' : 'Create account';
+    });
 
-    document.getElementById('authForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const endpoint = isSignup ? '/signup' : '/login';
-      const res = await fetch(endpoint, {
+    $('authSubmit').addEventListener('click', async () => {
+      const username = $('username').value.trim();
+      const password = $('password').value.trim();
+      if (!username || !password) return alert('username+password required');
+      const ep = isSignup ? '/signup' : '/login';
+      const res = await fetch(ep, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({username, password})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
       if (res.ok) {
-        document.getElementById('authForm').classList.add('hidden');
-        document.getElementById('postForm').classList.remove('hidden');
+        $('username').value = '';
+        $('password').value = '';
+        await refreshUI();
+        loadPosts();
       } else {
-        alert("Auth failed");
+        const j = await res.json().catch(()=>({}));
+        alert(j.error || 'auth failed');
       }
-    };
+    });
+
+    $('logoutBtn').addEventListener('click', async () => {
+      await fetch('/logout', { method:'POST' });
+      await refreshUI();
+    });
 
     async function loadPosts() {
       const res = await fetch('/posts');
       const posts = await res.json();
-      const container = document.getElementById('posts');
-      container.innerHTML = posts.map(p =>
-        `<div class="post">
-          <div class="author">${p.author}</div>
-          <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
-          <div class="content">${p.content}</div>
-        </div>`
-      ).join('');
+      const container = $('posts');
+      container.innerHTML = '';
+      for (const p of posts) {
+        const div = document.createElement('div');
+        div.className = 'post';
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = `${p.author} • ${new Date(p.timestamp).toLocaleString()}`;
+        const content = document.createElement('div');
+        const raw = marked.parse(p.content || '');
+        content.innerHTML = DOMPurify.sanitize(raw);
+        div.appendChild(meta);
+        div.appendChild(content);
+        if (p.image) {
+          const img = document.createElement('img');
+          img.className = 'post-image';
+          img.src = p.image;
+          img.alt = 'uploaded image';
+          div.appendChild(img);
+        }
+        container.appendChild(div);
+      }
     }
 
-    document.getElementById('postForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const author = document.getElementById('author').value.trim();
-      const content = document.getElementById('content').value.trim();
-      if (!author || !content) return;
-      const res = await fetch('/posts', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({author, content})
-      });
+    $('postSubmit').addEventListener('click', async () => {
+      const content = $('content').value.trim();
+      if (!content) return alert('content required');
+      const f = $('image').files[0];
+      const fd = new FormData();
+      fd.append('content', content);
+      if (f) fd.append('image', f);
+      const res = await fetch('/posts', { method: 'POST', body: fd });
       if (res.ok) {
-        document.getElementById('postForm').reset();
+        $('content').value = '';
+        $('image').value = '';
+        $('preview').classList.add('hidden');
         loadPosts();
       } else {
-        alert("You must be logged in to post");
+        const j = await res.json().catch(()=>({}));
+        alert(j.error || 'post failed');
       }
-    };
+    });
 
+    $('previewBtn').addEventListener('click', () => {
+      const raw = $('content').value || '';
+      const html = marked.parse(raw);
+      $('preview').innerHTML = DOMPurify.sanitize(html);
+      $('preview').classList.toggle('hidden');
+    });
+
+    // init
+    refreshUI();
     loadPosts();
+    // optional poll for new posts every 10s so new posts animate in
+    setInterval(loadPosts, 10000);
   </script>
 </body>
 </html>
