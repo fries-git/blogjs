@@ -1,193 +1,328 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Mini Blog</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; background:#0f1113; color:#e6eef3; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:1rem; }
-    h1 { margin:0; font-size:1.4rem; color:#fff; }
-    .card { background:#121417; padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.6); }
-    input, textarea, button { width:100%; margin-top:8px; padding:10px; border-radius:8px; border:1px solid #202428; background:#0f1315; color:#e6eef3; }
-    .row { display:flex; gap:8px; align-items:center; }
-    .small { width:120px; flex:0 0 120px; }
-    .hidden { display:none; }
-    .post { margin-top:12px; padding:12px; border-radius:10px; background:#0f1315; opacity:0; transform:translateY(10px); animation:fadeIn .35s forwards; }
-    .meta { color:#98aFC7; font-size:.85rem; margin-bottom:8px; }
-    img.post-image { max-width:100%; border-radius:8px; margin-top:8px; }
-    #posts { margin-top:1rem; }
-    @keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
-    .controls { display:flex; gap:8px; }
-    button.ghost { background:transparent; border:1px solid #2a3238; color:#cfe5ff; padding:8px 12px; border-radius:8px; cursor:pointer; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mini Blog — Playful Dark</title>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+
+<style>
+  :root{
+    --bg:#0b0f12;
+    --card:#0f1417;
+    --muted:#9fb4c8;
+    --accent:#7ee7c7;
+    --accent2:#ff9ad0;
+    --glass: rgba(255,255,255,0.03);
+  }
+
+  html,body{height:100%;margin:0;background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(126,231,199,0.06), transparent 6%),
+    radial-gradient(900px 400px at 90% 90%, rgba(255,154,208,0.04), transparent 6%),
+    var(--bg);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:#e6eef3;
+  }
+
+  .wrap{max-width:920px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 380px;gap:18px;}
+  header{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{margin:0;font-size:20px;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px}
+
+  .card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));
+        border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(2,6,10,0.6);border:1px solid rgba(255,255,255,0.03);}
+  .auth .row{display:flex;gap:8px}
+  input[type=text], input[type=password], textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
+      background:var(--glass);color:inherit;outline:none;font-size:14px}
+  textarea{resize:vertical;min-height:96px}
+
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#061014;font-weight:600;cursor:pointer}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;padding:8px;border-radius:10px}
+
+  /* posts column */
+  #postsCol{display:flex;flex-direction:column}
+  .post{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);animation:pop .32s forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
+  .author{font-weight:700;color:var(--accent)}
+  .time{font-size:12px;color:var(--muted)}
+  .content{color:#dcebf6;line-height:1.5}
+  img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+
+  /* right column */
+  .right .small{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .preview{background:#071015;padding:10px;border-radius:8px;color:#d5e9ff;margin-top:8px;max-height:240px;overflow:auto}
+
+  /* responsive */
+  @media (max-width:880px){
+    .wrap{grid-template-columns:1fr; padding:12px}
+    .right{order:2}
+  }
+</style>
 </head>
 <body>
+
+<div class="wrap">
   <header>
-    <h1>Mini Blog</h1>
-    <div id="userArea" class="row">
-      <div id="userName" style="font-weight:600;color:#9cd1ff"></div>
-      <div class="controls">
-        <button id="logoutBtn" class="ghost hidden">Logout</button>
+    <div>
+      <h1>Mini Blog</h1>
+      <div class="sub">dark mode. playful vibes. markdown + images.</div>
+    </div>
+
+    <div id="userPanel" class="card" style="display:flex;gap:10px;align-items:center">
+      <div style="min-width:160px">
+        <div id="meName" style="font-weight:700;color:var(--accent)"></div>
+        <div id="meSub" style="font-size:12px;color:var(--muted)">not signed in</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <button id="logoutBtn" class="ghost" style="display:none">Logout</button>
       </div>
     </div>
   </header>
 
-  <section class="card" id="authCard">
-    <h3 id="authTitle">Login</h3>
-    <div class="row">
-      <input id="username" placeholder="username">
-    </div>
-    <div class="row">
-      <input id="password" type="password" placeholder="password">
-    </div>
-    <div class="row" style="margin-top:8px;">
-      <button id="authSubmit">Login</button>
-      <button id="toggleAuth" class="ghost">Create account</button>
-    </div>
-  </section>
+  <!-- posts column -->
+  <main id="postsCol">
+    <section id="feedControls" class="card" style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="font-weight:700">Feed</div>
+        <div style="color:var(--muted);font-size:13px">Latest first</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="refreshBtn" class="ghost">Refresh</button>
+      </div>
+    </section>
 
-  <section class="card hidden" id="postCard">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <div style="font-weight:600" id="postAuthor">you</div>
-      <div style="color:#98aFC7;font-size:.85rem" id="postTime"></div>
-    </div>
-    <textarea id="content" rows="5" placeholder="Write in markdown..."></textarea>
-    <input type="file" id="image" accept="image/*">
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button id="postSubmit">Post</button>
-      <button id="previewBtn" class="ghost">Preview</button>
-    </div>
-    <div id="preview" class="hidden" style="margin-top:8px;padding:8px;border-radius:8px;background:#0b0d0f"></div>
-  </section>
+    <div id="posts" style="margin-top:12px"></div>
+  </main>
 
-  <div id="posts"></div>
+  <!-- right column: auth + composer -->
+  <aside class="right">
+    <section id="authCard" class="card auth">
+      <div class="small">account</div>
+      <div class="row" style="margin-bottom:8px">
+        <input id="u_name" type="text" placeholder="username">
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <input id="u_pass" type="password" placeholder="password">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="authBtn" class="btn">Login</button>
+        <button id="toggleAuth" class="ghost">Sign up</button>
+      </div>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">view-only when not signed in.</div>
+    </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <script>
-    // state
-    let isSignup = false;
-    const $ = id => document.getElementById(id);
+    <section id="composer" class="card" style="margin-top:12px">
+      <div class="small">compose</div>
+      <div id="composerMeta" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div id="displayName" style="font-weight:700;color:var(--accent)">guest</div>
+        <div id="composerClock" class="time" style="margin-left:auto"></div>
+      </div>
+      <textarea id="content" placeholder="Write something in markdown..."></textarea>
+      <input id="image" type="file" accept="image/*" style="margin-top:8px">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="postBtn" class="btn">Post</button>
+        <button id="previewBtn" class="ghost">Preview</button>
+      </div>
+      <div id="preview" class="preview" style="display:none"></div>
+    </section>
+  </aside>
+</div>
 
-    async function me() {
-      const r = await fetch('/me');
-      return r.ok ? r.json() : { user: null };
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+  // helpers
+  const $ = id => document.getElementById(id);
+  let currentUser = null;
+  let postsCache = [];
+
+  // sanitize + render markdown
+  function renderMarkdown(md){
+    try{
+      return DOMPurify.sanitize(marked.parse(md || ''));
+    }catch(e){ return DOMPurify.sanitize(md || ''); }
+  }
+
+  // build DOM node for a single post
+  function makePostNode(p){
+    const d = document.createElement('div');
+    d.className = 'post';
+    const meta = document.createElement('div'); meta.className='meta';
+    const a = document.createElement('div'); a.className='author'; a.textContent = p.author || 'unknown';
+    const t = document.createElement('div'); t.className='time'; t.textContent = new Date(p.timestamp).toLocaleString();
+    meta.appendChild(a); meta.appendChild(t);
+    const content = document.createElement('div'); content.className='content';
+    content.innerHTML = renderMarkdown(p.content || '');
+    d.appendChild(meta);
+    d.appendChild(content);
+    if (p.image){
+      const img = document.createElement('img'); img.className='post-image';
+      img.src = p.image; img.alt = 'post image';
+      d.appendChild(img);
     }
+    return d;
+  }
 
-    function showAuth(show) {
-      $('authCard').classList.toggle('hidden', !show);
+  // insert newest-first
+  function prependPost(p, animate=true){
+    const node = makePostNode(p);
+    const container = $('posts');
+    container.insertBefore(node, container.firstChild);
+    if (!animate){
+      node.style.animation = 'none'; node.style.opacity = 1;
     }
-    function showPost(show) {
-      $('postCard').classList.toggle('hidden', !show);
-    }
+  }
 
-    async function refreshUI() {
-      const m = await me();
-      if (m.user) {
-        $('userName').textContent = m.user;
-        $('logoutBtn').classList.remove('hidden');
-        showAuth(false);
-        showPost(true);
-        $('postAuthor').textContent = m.user;
-      } else {
-        $('userName').textContent = '';
-        $('logoutBtn').classList.add('hidden');
-        showAuth(true);
-        showPost(false);
-      }
-    }
-
-    $('toggleAuth').addEventListener('click', () => {
-      isSignup = !isSignup;
-      $('authTitle').innerText = isSignup ? 'Create account' : 'Login';
-      $('authSubmit').innerText = isSignup ? 'Sign up' : 'Login';
-      $('toggleAuth').innerText = isSignup ? 'Already have an account?' : 'Create account';
-    });
-
-    $('authSubmit').addEventListener('click', async () => {
-      const username = $('username').value.trim();
-      const password = $('password').value.trim();
-      if (!username || !password) return alert('username+password required');
-      const ep = isSignup ? '/signup' : '/login';
-      const res = await fetch(ep, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      if (res.ok) {
-        $('username').value = '';
-        $('password').value = '';
-        await refreshUI();
-        loadPosts();
-      } else {
-        const j = await res.json().catch(()=>({}));
-        alert(j.error || 'auth failed');
-      }
-    });
-
-    $('logoutBtn').addEventListener('click', async () => {
-      await fetch('/logout', { method:'POST' });
-      await refreshUI();
-    });
-
-    async function loadPosts() {
+  // fetch posts and render fresh (used on load/refresh)
+  async function loadPosts(){
+    try{
       const res = await fetch('/posts');
-      const posts = await res.json();
-      const container = $('posts');
-      container.innerHTML = '';
-      for (const p of posts) {
-        const div = document.createElement('div');
-        div.className = 'post';
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.textContent = `${p.author} • ${new Date(p.timestamp).toLocaleString()}`;
-        const content = document.createElement('div');
-        const raw = marked.parse(p.content || '');
-        content.innerHTML = DOMPurify.sanitize(raw);
-        div.appendChild(meta);
-        div.appendChild(content);
-        if (p.image) {
-          const img = document.createElement('img');
-          img.className = 'post-image';
-          img.src = p.image;
-          img.alt = 'uploaded image';
-          div.appendChild(img);
-        }
-        container.appendChild(div);
+      const arr = await res.json();
+      postsCache = arr;
+      $('posts').innerHTML = '';
+      for (const p of arr){
+        prependPost(p, true);
       }
+    }catch(e){
+      console.error('posts load', e);
     }
+  }
 
-    $('postSubmit').addEventListener('click', async () => {
-      const content = $('content').value.trim();
-      if (!content) return alert('content required');
-      const f = $('image').files[0];
-      const fd = new FormData();
-      fd.append('content', content);
-      if (f) fd.append('image', f);
-      const res = await fetch('/posts', { method: 'POST', body: fd });
-      if (res.ok) {
-        $('content').value = '';
-        $('image').value = '';
-        $('preview').classList.add('hidden');
-        loadPosts();
-      } else {
-        const j = await res.json().catch(()=>({}));
-        alert(j.error || 'post failed');
+  // get current user
+  async function whoami(){
+    try{
+      const r = await fetch('/me'); if (!r.ok) return null;
+      const j = await r.json();
+      return j.user || null;
+    }catch(e){ return null; }
+  }
+
+  // UI state refresh
+  async function refreshUI(){
+    currentUser = await whoami();
+    if (currentUser){
+      $('meName').textContent = currentUser;
+      $('meSub').textContent = 'signed in';
+      $('logoutBtn').style.display = 'inline-block';
+      $('displayName').textContent = currentUser;
+      $('composer').style.display = '';
+    } else {
+      $('meName').textContent = '';
+      $('meSub').textContent = 'not signed in';
+      $('logoutBtn').style.display = 'none';
+      $('displayName').textContent = 'guest';
+      $('composer').style.display = '';
+    }
+  }
+
+  // auth flows
+  let signingUp = false;
+  $('toggleAuth').addEventListener('click', ()=> {
+    signingUp = !signingUp;
+    $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
+    $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
+  });
+
+  $('authBtn').addEventListener('click', async ()=>{
+    const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
+    if (!u || !p) return alert('username + password required');
+    const ep = signingUp ? '/signup' : '/login';
+    try{
+      const res = await fetch(ep, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+      if (!res.ok){
+        const j = await res.json().catch(()=>({})); return alert(j.error || 'auth failed');
       }
-    });
+      $('u_name').value='';$('u_pass').value='';
+      await refreshUI(); loadPosts();
+    }catch(e){ alert('auth error'); }
+  });
 
-    $('previewBtn').addEventListener('click', () => {
-      const raw = $('content').value || '';
-      const html = marked.parse(raw);
-      $('preview').innerHTML = DOMPurify.sanitize(html);
-      $('preview').classList.toggle('hidden');
-    });
+  $('logoutBtn').addEventListener('click', async ()=>{
+    await fetch('/logout',{method:'POST'}).catch(()=>{});
+    await refreshUI();
+  });
 
-    // init
-    refreshUI();
-    loadPosts();
-    // optional poll for new posts every 10s so new posts animate in
-    setInterval(loadPosts, 10000);
-  </script>
+  // posting
+  $('postBtn').addEventListener('click', async ()=>{
+    const content = $('content').value.trim();
+    if (!content) return alert('write something first');
+    // must be logged in to post per server rules
+    if (!currentUser) return alert('you must be logged in to post');
+
+    const fd = new FormData();
+    fd.append('content', content);
+    const file = $('image').files[0];
+    if (file) fd.append('image', file);
+
+    try{
+      const res = await fetch('/posts', { method:'POST', body:fd });
+      const j = await res.json();
+      if (!res.ok) return alert(j.error || 'post failed');
+
+      const newPost = j.post || j; // support both shapes
+      // show confetti
+      confetti({
+        particleCount: 60,
+        spread: 70,
+        origin: { y: 0.4 }
+      });
+      prependPost(newPost);
+      // clear composer
+      $('content').value=''; $('image').value='';
+      $('preview').style.display='none';
+    }catch(e){
+      console.error(e); alert('post error');
+    }
+  });
+
+  $('previewBtn').addEventListener('click', ()=>{
+    const raw = $('content').value || '';
+    const html = renderMarkdown(raw);
+    $('preview').innerHTML = html;
+    $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
+  });
+
+  // quick refresh button
+  $('refreshBtn').addEventListener('click', loadPosts);
+
+  // clock in composer
+  setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
+
+  // init
+  (async function init(){
+    await refreshUI();
+    await loadPosts();
+  })();
+
+  // optional: poll for new posts and append only new items (no flicker)
+  let lastCheck = Date.now();
+  setInterval(async ()=>{
+    try{
+      const res = await fetch('/posts');
+      const arr = await res.json();
+      if (!Array.isArray(arr)) return;
+      // find new items by timestamp or by simple length compare
+      if (arr.length > postsCache.length){
+        // assume newest-first on server; iterate until we hit known item
+        const newItems = [];
+        for (const p of arr){
+          if (!postsCache.find(x=> x.timestamp === p.timestamp && x.author === p.author)) newItems.push(p);
+          else break;
+        }
+        // prepend in reverse order so newest stays at top
+        for (let i=newItems.length-1;i>=0;i--) prependPost(newItems[i]);
+        postsCache = arr;
+      } else if (arr.length !== postsCache.length){
+        // fallback: full reload
+        postsCache = arr; $('posts').innerHTML=''; arr.forEach(p=> prependPost(p));
+      }
+    }catch(e){ /* ignore poll errors */ }
+  }, 7000);
+</script>
 </body>
 </html>
