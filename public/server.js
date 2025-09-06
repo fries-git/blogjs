@@ -19,7 +19,11 @@ app.post('/posts', (req, res) => {
   if (fs.existsSync(postsFile)) {
     posts = JSON.parse(fs.readFileSync(postsFile));
   }
-  posts.push({author: req.body.author, content: req.body.content});
+  posts.push({
+    author: req.body.author,
+    content: req.body.content,
+    timestamp: new Date().toISOString()
+  });
   fs.writeFileSync(postsFile, JSON.stringify(posts, null, 2));
   res.json({status: 'ok'});
 });
