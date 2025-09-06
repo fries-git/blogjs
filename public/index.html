@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mini Blog</title>
+  <title>Blog.js</title>
   <style>
     body {
       font-family: sans-serif;
       max-width: 600px;
       margin: 2rem auto;
-      background: #f7f7f7;
-      color: #333;
+      background: #121212;
+      color: #eee;
     }
     h1 {
       text-align: center;
       margin-bottom: 1rem;
+      color: #fff;
     }
     form {
-      background: white;
+      background: #1e1e1e;
       padding: 1rem;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
       margin-bottom: 1.5rem;
     }
     input, textarea, button {
@@ -26,32 +27,51 @@
       margin-top: 0.5rem;
       padding: 0.5rem;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: none;
       font-size: 1rem;
+    }
+    input, textarea {
+      background: #2a2a2a;
+      color: #eee;
     }
     button {
       background: #4CAF50;
       color: white;
-      border: none;
       cursor: pointer;
       margin-top: 1rem;
+      transition: background 0.2s;
     }
     button:hover {
       background: #45a049;
     }
     .post {
-      background: white;
+      background: #1e1e1e;
       padding: 1rem;
       margin-bottom: 1rem;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.4s forwards;
     }
     .author {
       font-weight: bold;
+      margin-bottom: 0.25rem;
+      color: #90caf9;
+    }
+    .timestamp {
+      font-size: 0.8rem;
+      color: #bbb;
       margin-bottom: 0.5rem;
     }
     .content {
       white-space: pre-wrap;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -72,6 +92,7 @@
       container.innerHTML = posts.map(p =>
         `<div class="post">
           <div class="author">${p.author}</div>
+          <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
           <div class="content">${p.content}</div>
         </div>`
       ).join('');
