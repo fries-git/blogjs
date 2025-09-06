@@ -1,90 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Blog.js</title>
+  <title>Mini Blog</title>
   <style>
-    body {
-      font-family: sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      background: #121212;
-      color: #eee;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #fff;
-    }
-    form {
-      background: #1e1e1e;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
-      margin-bottom: 1.5rem;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: none;
-      font-size: 1rem;
-    }
-    input, textarea {
-      background: #2a2a2a;
-      color: #eee;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      cursor: pointer;
-      margin-top: 1rem;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    .post {
-      background: #1e1e1e;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.6);
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.4s forwards;
-    }
-    .author {
-      font-weight: bold;
-      margin-bottom: 0.25rem;
-      color: #90caf9;
-    }
-    .timestamp {
-      font-size: 0.8rem;
-      color: #bbb;
-      margin-bottom: 0.5rem;
-    }
-    .content {
-      white-space: pre-wrap;
-    }
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; background: #121212; color: #eee; }
+    h1 { text-align: center; color: #fff; }
+    form { background: #1e1e1e; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+    input, textarea, button { width: 100%; margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; border: none; }
+    input, textarea { background: #2a2a2a; color: #eee; }
+    button { background: #4CAF50; color: white; cursor: pointer; margin-top: 1rem; }
+    button:hover { background: #45a049; }
+    .hidden { display: none; }
+    .post { background: #1e1e1e; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+    .author { font-weight: bold; color: #90caf9; }
+    .timestamp { font-size: 0.8rem; color: #bbb; margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
   <h1>My Blog</h1>
-  <form id="postForm">
-    <input type="text" id="author" placeholder="Your name" required>
+
+  <form id="authForm">
+    <h3 id="authTitle">Login</h3>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+    <button type="button" id="toggleAuth">Create Account</button>
+  </form>
+
+  <form id="postForm" class="hidden">
+    <input type="text" id="author" placeholder="Your display name" required>
     <textarea id="content" rows="4" placeholder="Write something..." required></textarea>
     <button type="submit">Post</button>
   </form>
+
   <div id="posts"></div>
 
   <script>
+    let isSignup = false;
+
+    document.getElementById('toggleAuth').onclick = () => {
+      isSignup = !isSignup;
+      document.getElementById('authTitle').innerText = isSignup ? "Sign Up" : "Login";
+      document.querySelector('#authForm button[type="submit"]').innerText = isSignup ? "Sign Up" : "Login";
+      document.getElementById('toggleAuth').innerText = isSignup ? "Already have an account?" : "Create Account";
+    };
+
+    document.getElementById('authForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const endpoint = isSignup ? '/signup' : '/login';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password})
+      });
+      if (res.ok) {
+        document.getElementById('authForm').classList.add('hidden');
+        document.getElementById('postForm').classList.remove('hidden');
+      } else {
+        alert("Auth failed");
+      }
+    };
+
     async function loadPosts() {
       const res = await fetch('/posts');
       const posts = await res.json();
@@ -103,13 +81,17 @@
       const author = document.getElementById('author').value.trim();
       const content = document.getElementById('content').value.trim();
       if (!author || !content) return;
-      await fetch('/posts', {
+      const res = await fetch('/posts', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({author, content})
       });
-      document.getElementById('postForm').reset();
-      loadPosts();
+      if (res.ok) {
+        document.getElementById('postForm').reset();
+        loadPosts();
+      } else {
+        alert("You must be logged in to post");
+      }
     };
 
     loadPosts();
