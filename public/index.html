@@ -5,71 +5,77 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Mini Blog — Playful Dark</title>
 
-<link rel="preconnect" href="https://cdn.jsdelivr.net" />
-
 <style>
-  :root{
-    --bg:#0b0f12;
-    --card:#0f1417;
-    --muted:#9fb4c8;
-    --accent:#7ee7c7;
-    --accent2:#ff9ad0;
-    --glass: rgba(255,255,255,0.03);
-  }
+:root{
+  --bg:#0b0f12;
+  --card:#0f1417;
+  --muted:#9fb4c8;
+  --accent:#7ee7c7;
+  --accent2:#ff9ad0;
+  --glass: rgba(255,255,255,0.03);
+}
 
-  html,body{height:100%;margin:0;background:
+html,body{
+  height:100%;margin:0;
+  background:
     radial-gradient(1200px 600px at 10% 10%, rgba(126,231,199,0.06), transparent 6%),
     radial-gradient(900px 400px at 90% 90%, rgba(255,154,208,0.04), transparent 6%),
     var(--bg);
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    color:#e6eef3;
-  }
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color:#e6eef3;
+}
 
-  .wrap{max-width:920px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 380px;gap:18px;}
-  header{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  h1{margin:0;font-size:20px;letter-spacing:.2px}
-  .sub{color:var(--muted);font-size:13px}
+.wrap{max-width:920px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 380px;gap:18px;}
+header{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{margin:0;font-size:20px;letter-spacing:.2px}
+.sub{color:var(--muted);font-size:13px}
 
-  .card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));
-        border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(2,6,10,0.6);border:1px solid rgba(255,255,255,0.03);}
-  .auth .row{display:flex;gap:8px}
-  input[type=text], input[type=password], textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
-      background:var(--glass);color:inherit;outline:none;font-size:14px}
-  textarea{resize:vertical;min-height:96px}
+.card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));
+      border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(2,6,10,0.6);border:1px solid rgba(255,255,255,0.03);}
+input[type=text], input[type=password], textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
+    background:var(--glass);color:inherit;outline:none;font-size:14px}
+textarea{resize:vertical;min-height:96px}
+.btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#061014;font-weight:600;cursor:pointer}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;padding:8px;border-radius:10px}
 
-  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#061014;font-weight:600;cursor:pointer}
-  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;padding:8px;border-radius:10px}
+#postsCol{display:flex;flex-direction:column}
+.post{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);animation:pop .32s forwards}
+@keyframes pop{to{opacity:1;transform:none}}
+.meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
+.author{font-weight:700;color:var(--accent)}
+.time{font-size:12px;color:var(--muted)}
+.content{color:#dcebf6;line-height:1.5}
+img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
 
-  /* posts column */
-  #postsCol{display:flex;flex-direction:column}
-  .post{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);animation:pop .32s forwards}
-  @keyframes pop{to{opacity:1;transform:none}}
-  .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
-  .author{font-weight:700;color:var(--accent)}
-  .time{font-size:12px;color:var(--muted)}
-  .content{color:#dcebf6;line-height:1.5}
-  img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+.right .small{font-size:13px;color:var(--muted);margin-bottom:8px}
+.preview{background:#071015;padding:10px;border-radius:8px;color:#d5e9ff;margin-top:8px;max-height:240px;overflow:auto}
 
-  /* right column */
-  .right .small{font-size:13px;color:var(--muted);margin-bottom:8px}
-  .preview{background:#071015;padding:10px;border-radius:8px;color:#d5e9ff;margin-top:8px;max-height:240px;overflow:auto}
+/* File input styling */
+.file-btn {
+  display:inline-block;
+  padding:8px 14px;
+  border-radius:10px;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+  color:#061014;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+}
+.file-btn:hover { opacity:0.9; }
 
-  /* responsive */
-  @media (max-width:880px){
-    .wrap{grid-template-columns:1fr; padding:12px}
-    .right{order:2}
-  }
+@media (max-width:880px){
+  .wrap{grid-template-columns:1fr; padding:12px}
+  .right{order:2}
+}
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header>
     <div>
       <h1>Mini Blog</h1>
       <div class="sub">dark mode. playful vibes. markdown + images.</div>
     </div>
-
     <div id="userPanel" class="card" style="display:flex;gap:10px;align-items:center">
       <div style="min-width:160px">
         <div id="meName" style="font-weight:700;color:var(--accent)"></div>
@@ -81,7 +87,6 @@
     </div>
   </header>
 
-  <!-- posts column -->
   <main id="postsCol">
     <section id="feedControls" class="card" style="display:flex;gap:8px;align-items:center;justify-content:space-between">
       <div style="display:flex;gap:10px;align-items:center">
@@ -96,7 +101,6 @@
     <div id="posts" style="margin-top:12px"></div>
   </main>
 
-  <!-- right column: auth + composer -->
   <aside class="right">
     <section id="authCard" class="card auth">
       <div class="small">account</div>
@@ -120,7 +124,10 @@
         <div id="composerClock" class="time" style="margin-left:auto"></div>
       </div>
       <textarea id="content" placeholder="Write something in markdown..."></textarea>
-      <input id="image" type="file" accept="image/*" style="margin-top:8px">
+      <label class="file-btn" style="margin-top:8px">
+        Choose file
+        <input type="file" id="image" accept="image/*" hidden>
+      </label>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button id="postBtn" class="btn">Post</button>
         <button id="previewBtn" class="ghost">Preview</button>
@@ -130,199 +137,89 @@
   </aside>
 </div>
 
-<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
-  // helpers
-  const $ = id => document.getElementById(id);
-  let currentUser = null;
-  let postsCache = [];
+const $=id=>document.getElementById(id);
+let currentUser=null, shownPosts=new Set();
 
-  // sanitize + render markdown
-  function renderMarkdown(md){
-    try{
-      return DOMPurify.sanitize(marked.parse(md || ''));
-    }catch(e){ return DOMPurify.sanitize(md || ''); }
+function uniqueKey(p){ return p.author+'-'+p.timestamp; }
+function renderMarkdown(md){ return DOMPurify.sanitize(marked.parse(md||'')); }
+function makePostNode(p){
+  const d=document.createElement('div');d.className='post';
+  const meta=document.createElement('div');meta.className='meta';
+  const a=document.createElement('div');a.className='author';a.textContent=p.author||'unknown';
+  const t=document.createElement('div');t.className='time';t.textContent=new Date(p.timestamp).toLocaleString();
+  meta.appendChild(a);meta.appendChild(t);
+  const content=document.createElement('div');content.className='content';
+  content.innerHTML=renderMarkdown(p.content||'');
+  d.appendChild(meta);d.appendChild(content);
+  if(p.image){const img=document.createElement('img');img.className='post-image';img.src=p.image;img.alt='post image';d.appendChild(img);}
+  return d;
+}
+function prependPost(p,animate=true){const node=makePostNode(p);const container=$('posts');container.insertBefore(node,container.firstChild);shownPosts.add(uniqueKey(p));if(!animate){node.style.animation='none';node.style.opacity=1;}}
+
+async function loadPosts(){
+  try{
+    const res=await fetch('/posts');const arr=await res.json();
+    $('posts').innerHTML='';shownPosts.clear();
+    for(const p of arr) prependPost(p,false);
+  }catch(e){console.error('loadPosts',e);}
+}
+
+async function whoami(){
+  try{const r=await fetch('/me');if(!r.ok)return null;const j=await r.json();return j.user||null;}catch(e){return null;}
+}
+
+async function refreshUI(){
+  currentUser=await whoami();
+  if(currentUser){
+    $('meName').textContent=currentUser;$('meSub').textContent='signed in';$('logoutBtn').style.display='inline-block';$('displayName').textContent=currentUser;
+  }else{
+    $('meName').textContent='';$('meSub').textContent='not signed in';$('logoutBtn').style.display='none';$('displayName').textContent='guest';
   }
+}
 
-  // build DOM node for a single post
-  function makePostNode(p){
-    const d = document.createElement('div');
-    d.className = 'post';
-    const meta = document.createElement('div'); meta.className='meta';
-    const a = document.createElement('div'); a.className='author'; a.textContent = p.author || 'unknown';
-    const t = document.createElement('div'); t.className='time'; t.textContent = new Date(p.timestamp).toLocaleString();
-    meta.appendChild(a); meta.appendChild(t);
-    const content = document.createElement('div'); content.className='content';
-    content.innerHTML = renderMarkdown(p.content || '');
-    d.appendChild(meta);
-    d.appendChild(content);
-    if (p.image){
-      const img = document.createElement('img'); img.className='post-image';
-      img.src = p.image; img.alt = 'post image';
-      d.appendChild(img);
-    }
-    return d;
-  }
+let signingUp=false;
+$('toggleAuth').addEventListener('click',()=>{signingUp=!signingUp;$('authBtn').textContent=signingUp?'Sign up':'Login';$('toggleAuth').textContent=signingUp?'Have an account?':'Sign up';});
+$('authBtn').addEventListener('click',async()=>{
+  const u=$('u_name').value.trim(),p=$('u_pass').value.trim();
+  if(!u||!p)return alert('username + password required');
+  const ep=signingUp?'/signup':'/login';
+  try{
+    const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    if(!res.ok){const j=await res.json().catch(()=>({}));return alert(j.error||'auth failed');}
+    $('u_name').value='';$('u_pass').value='';
+    await refreshUI();loadPosts();
+  }catch(e){alert('auth error');}
+});
+$('logoutBtn').addEventListener('click',async()=>{await fetch('/logout',{method:'POST'}).catch(()=>{});await refreshUI();});
 
-  // insert newest-first
-  function prependPost(p, animate=true){
-    const node = makePostNode(p);
-    const container = $('posts');
-    container.insertBefore(node, container.firstChild);
-    if (!animate){
-      node.style.animation = 'none'; node.style.opacity = 1;
-    }
-  }
+$('postBtn').addEventListener('click',async()=>{
+  const content=$('content').value.trim();
+  if(!content)return alert('write something first');if(!currentUser)return alert('must be logged in to post');
+  const fd=new FormData();fd.append('content',content);const file=$('image').files[0];if(file)fd.append('image',file);
+  try{
+    const res=await fetch('/posts',{method:'POST',body:fd});const j=await res.json();if(!res.ok)return alert(j.error||'post failed');
+    const newPost=j.post||j;
+    confetti({particleCount:60,spread:70,origin:{y:0.4}});
+    prependPost(newPost);$('content').value='';$('image').value='';$('preview').style.display='none';
+  }catch(e){console.error(e);alert('post error');}
+});
 
-  // fetch posts and render fresh (used on load/refresh)
-  async function loadPosts(){
-    try{
-      const res = await fetch('/posts');
-      const arr = await res.json();
-      postsCache = arr;
-      $('posts').innerHTML = '';
-      for (const p of arr){
-        prependPost(p, true);
-      }
-    }catch(e){
-      console.error('posts load', e);
-    }
-  }
+$('previewBtn').addEventListener('click',()=>{$('preview').innerHTML=renderMarkdown($('content').value||'');$('preview').style.display=$('preview').style.display==='none'?'block':'none';});
+$('refreshBtn').addEventListener('click',loadPosts);
+setInterval(()=>$('composerClock').textContent=new Date().toLocaleTimeString(),1000);
 
-  // get current user
-  async function whoami(){
-    try{
-      const r = await fetch('/me'); if (!r.ok) return null;
-      const j = await r.json();
-      return j.user || null;
-    }catch(e){ return null; }
-  }
-
-  // UI state refresh
-  async function refreshUI(){
-    currentUser = await whoami();
-    if (currentUser){
-      $('meName').textContent = currentUser;
-      $('meSub').textContent = 'signed in';
-      $('logoutBtn').style.display = 'inline-block';
-      $('displayName').textContent = currentUser;
-      $('composer').style.display = '';
-    } else {
-      $('meName').textContent = '';
-      $('meSub').textContent = 'not signed in';
-      $('logoutBtn').style.display = 'none';
-      $('displayName').textContent = 'guest';
-      $('composer').style.display = '';
-    }
-  }
-
-  // auth flows
-  let signingUp = false;
-  $('toggleAuth').addEventListener('click', ()=> {
-    signingUp = !signingUp;
-    $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
-    $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
-  });
-
-  $('authBtn').addEventListener('click', async ()=>{
-    const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
-    if (!u || !p) return alert('username + password required');
-    const ep = signingUp ? '/signup' : '/login';
-    try{
-      const res = await fetch(ep, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-      if (!res.ok){
-        const j = await res.json().catch(()=>({})); return alert(j.error || 'auth failed');
-      }
-      $('u_name').value='';$('u_pass').value='';
-      await refreshUI(); loadPosts();
-    }catch(e){ alert('auth error'); }
-  });
-
-  $('logoutBtn').addEventListener('click', async ()=>{
-    await fetch('/logout',{method:'POST'}).catch(()=>{});
-    await refreshUI();
-  });
-
-  // posting
-  $('postBtn').addEventListener('click', async ()=>{
-    const content = $('content').value.trim();
-    if (!content) return alert('write something first');
-    // must be logged in to post per server rules
-    if (!currentUser) return alert('you must be logged in to post');
-
-    const fd = new FormData();
-    fd.append('content', content);
-    const file = $('image').files[0];
-    if (file) fd.append('image', file);
-
-    try{
-      const res = await fetch('/posts', { method:'POST', body:fd });
-      const j = await res.json();
-      if (!res.ok) return alert(j.error || 'post failed');
-
-      const newPost = j.post || j; // support both shapes
-      // show confetti
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.4 }
-      });
-      prependPost(newPost);
-      // clear composer
-      $('content').value=''; $('image').value='';
-      $('preview').style.display='none';
-    }catch(e){
-      console.error(e); alert('post error');
-    }
-  });
-
-  $('previewBtn').addEventListener('click', ()=>{
-    const raw = $('content').value || '';
-    const html = renderMarkdown(raw);
-    $('preview').innerHTML = html;
-    $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
-  });
-
-  // quick refresh button
-  $('refreshBtn').addEventListener('click', loadPosts);
-
-  // clock in composer
-  setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
-
-  // init
-  (async function init(){
-    await refreshUI();
-    await loadPosts();
-  })();
-
-  // optional: poll for new posts and append only new items (no flicker)
-  let lastCheck = Date.now();
-  setInterval(async ()=>{
-    try{
-      const res = await fetch('/posts');
-      const arr = await res.json();
-      if (!Array.isArray(arr)) return;
-      // find new items by timestamp or by simple length compare
-      if (arr.length > postsCache.length){
-        // assume newest-first on server; iterate until we hit known item
-        const newItems = [];
-        for (const p of arr){
-          if (!postsCache.find(x=> x.timestamp === p.timestamp && x.author === p.author)) newItems.push(p);
-          else break;
-        }
-        // prepend in reverse order so newest stays at top
-        for (let i=newItems.length-1;i>=0;i--) prependPost(newItems[i]);
-        postsCache = arr;
-      } else if (arr.length !== postsCache.length){
-        // fallback: full reload
-        postsCache = arr; $('posts').innerHTML=''; arr.forEach(p=> prependPost(p));
-      }
-    }catch(e){ /* ignore poll errors */ }
-  }, 7000);
+(async function init(){await refreshUI();await loadPosts();})();
+setInterval(async()=>{
+  try{
+    const res=await fetch('/posts');const arr=await res.json();if(!Array.isArray(arr))return;
+    for(const p of arr){if(!shownPosts.has(uniqueKey(p))) prependPost(p);}
+  }catch(e){}
+},7000);
 </script>
 </body>
 </html>
