@@ -69,10 +69,20 @@ app.post('/logout', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// replace existing /me route with this
 app.get('/me', (req, res) => {
-  const user = req.cookies.user || null;
-  res.json({ user });
+  const username = req.cookies.user;
+  if (!username) return res.json({ user: null });
+
+  const users = readJSON(usersFile); // uses existing helper
+  const exists = users.find(u => u.username === username);
+  if (exists) return res.json({ user: username });
+
+  // cookie invalid (user deleted or file reset). clear it.
+  res.clearCookie('user');
+  res.json({ user: null });
 });
+
 
 // posts
 app.get('/posts', (req, res) => {
