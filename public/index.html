@@ -4,81 +4,71 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Mini Blog — Playful Dark</title>
-
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <style>
 :root{
-  --bg:#0b0f12;
-  --card:#0f1417;
-  --muted:#9fb4c8;
-  --accent:#7ee7c7;
-  --accent2:#ff9ad0;
-  --glass: rgba(255,255,255,0.03);
+  --bg:#0b0f12; --card:#0f1417; --muted:#9fb4c8;
+  --accent:#7ee7c7; --accent2:#ff9ad0; --glass: rgba(255,255,255,0.03);
 }
-
-html,body{
-  height:100%;margin:0;
-  background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(126,231,199,0.06), transparent 6%),
-    radial-gradient(900px 400px at 90% 90%, rgba(255,154,208,0.04), transparent 6%),
-    var(--bg);
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+html,body{height:100%;margin:0;background:
+  radial-gradient(900px 400px at 10% 10%, rgba(126,231,199,0.05), transparent 6%),
+  radial-gradient(700px 300px at 90% 90%, rgba(255,154,208,0.03), transparent 6%),
+  var(--bg);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   color:#e6eef3;
 }
-
-.wrap{max-width:920px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 380px;gap:18px;}
+.wrap{max-width:960px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 380px;gap:18px;}
 header{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-h1{margin:0;font-size:20px;letter-spacing:.2px}
+h1{margin:0;font-size:20px}
 .sub{color:var(--muted);font-size:13px}
 
+/* cards */
 .card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));
-      border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(2,6,10,0.6);border:1px solid rgba(255,255,255,0.03);}
-input[type=text], input[type=password], textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
-    background:var(--glass);color:inherit;outline:none;font-size:14px}
+  border-radius:14px;padding:14px;box-shadow:0 10px 30px rgba(2,6,10,0.6);border:1px solid rgba(255,255,255,0.03);}
+input[type=text], input[type=password], textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);
+  background:var(--glass);color:inherit;outline:none;font-size:14px}
 textarea{resize:vertical;min-height:96px}
-.btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#061014;font-weight:600;cursor:pointer}
+.btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:10px 14px;border-radius:12px;color:#061014;font-weight:700;cursor:pointer}
 .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;padding:8px;border-radius:10px}
 
+/* posts */
 #postsCol{display:flex;flex-direction:column}
 .post{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);animation:pop .32s forwards}
 @keyframes pop{to{opacity:1;transform:none}}
 .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
-.author{font-weight:700;color:var(--accent)}
+.author{font-weight:800;color:var(--accent)}
 .time{font-size:12px;color:var(--muted)}
 .content{color:#dcebf6;line-height:1.5}
 img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
 
-.right .small{font-size:13px;color:var(--muted);margin-bottom:8px}
-.preview{background:#071015;padding:10px;border-radius:8px;color:#d5e9ff;margin-top:8px;max-height:240px;overflow:auto}
+/* composer extras */
+.preview{background:#071015;padding:10px;border-radius:8px;color:#d5e9ff;margin-top:8px;max-height:260px;overflow:auto}
+.file-btn {display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#061014;font-weight:700;cursor:pointer;border:0}
+.file-name {font-size:13px;color:var(--muted);margin-left:8px}
 
-/* File input styling */
-.file-btn {
-  display:inline-block;
-  padding:8px 14px;
-  border-radius:10px;
-  background:linear-gradient(90deg, var(--accent), var(--accent2));
-  color:#061014;
-  cursor:pointer;
-  font-size:14px;
-  font-weight:600;
-}
-.file-btn:hover { opacity:0.9; }
+/* playful touches */
+.logo-emoji{font-size:20px;margin-right:8px;transform:translateY(2px)}
+.post-bubble{position:relative}
+.post-bubble::after{content:"";position:absolute;right:14px;top:-6px;width:12px;height:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:50%;opacity:.12;filter:blur(6px)}
 
-@media (max-width:880px){
-  .wrap{grid-template-columns:1fr; padding:12px}
-  .right{order:2}
-}
+/* responsive */
+@media (max-width:920px){.wrap{grid-template-columns:1fr;padding:12px}.right{order:2}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>Mini Blog</h1>
-      <div class="sub">dark mode. playful vibes. markdown + images.</div>
+    <div style="display:flex;align-items:center">
+      <div class="logo-emoji">✨</div>
+      <div>
+        <h1>Mini Blog</h1>
+        <div class="sub">cheery dark. markdown + images. confetti on post.</div>
+      </div>
     </div>
+
     <div id="userPanel" class="card" style="display:flex;gap:10px;align-items:center">
-      <div style="min-width:160px">
-        <div id="meName" style="font-weight:700;color:var(--accent)"></div>
+      <div style="min-width:180px">
+        <div id="meName" style="font-weight:800;color:var(--accent)"></div>
         <div id="meSub" style="font-size:12px;color:var(--muted)">not signed in</div>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
@@ -90,8 +80,8 @@ img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
   <main id="postsCol">
     <section id="feedControls" class="card" style="display:flex;gap:8px;align-items:center;justify-content:space-between">
       <div style="display:flex;gap:10px;align-items:center">
-        <div style="font-weight:700">Feed</div>
-        <div style="color:var(--muted);font-size:13px">Latest first</div>
+        <div style="font-weight:800">Feed</div>
+        <div style="color:var(--muted);font-size:13px">Latest first • playful mode</div>
       </div>
       <div style="display:flex;gap:8px">
         <button id="refreshBtn" class="ghost">Refresh</button>
@@ -103,36 +93,35 @@ img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
 
   <aside class="right">
     <section id="authCard" class="card auth">
-      <div class="small">account</div>
-      <div class="row" style="margin-bottom:8px">
-        <input id="u_name" type="text" placeholder="username">
-      </div>
-      <div class="row" style="margin-bottom:8px">
-        <input id="u_pass" type="password" placeholder="password">
-      </div>
-      <div style="display:flex;gap:8px">
-        <button id="authBtn" class="btn">Login</button>
-        <button id="toggleAuth" class="ghost">Sign up</button>
-      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">account</div>
+      <div style="margin-bottom:8px"><input id="u_name" placeholder="username" /></div>
+      <div style="margin-bottom:8px"><input id="u_pass" type="password" placeholder="password" /></div>
+      <div style="display:flex;gap:8px"><button id="authBtn" class="btn">Login</button><button id="toggleAuth" class="ghost">Sign up</button></div>
       <div style="margin-top:8px;color:var(--muted);font-size:13px">view-only when not signed in.</div>
     </section>
 
     <section id="composer" class="card" style="margin-top:12px">
-      <div class="small">compose</div>
-      <div id="composerMeta" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <div id="displayName" style="font-weight:700;color:var(--accent)">guest</div>
-        <div id="composerClock" class="time" style="margin-left:auto"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="font-weight:800" id="displayName">guest</div>
+        <div id="composerClock" style="color:var(--muted);margin-left:auto;font-size:13px"></div>
       </div>
       <textarea id="content" placeholder="Write something in markdown..."></textarea>
-      <label class="file-btn" style="margin-top:8px">
-        Choose file
-        <input type="file" id="image" accept="image/*" hidden>
-      </label>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="postBtn" class="btn">Post</button>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <label class="file-btn" id="fileBtn">
+          📎 Attach
+          <input id="image" type="file" accept="image/*" hidden>
+        </label>
+        <div class="file-name" id="fileName">no file</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="postBtn" class="btn">Post ✨</button>
         <button id="previewBtn" class="ghost">Preview</button>
       </div>
-      <div id="preview" class="preview" style="display:none"></div>
+
+      <div id="preview" class="preview" style="display:none;margin-top:10px"></div>
+      <div id="imagePreview" style="margin-top:10px;"></div>
     </section>
   </aside>
 </div>
@@ -142,84 +131,182 @@ img.post-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
-const $=id=>document.getElementById(id);
-let currentUser=null, shownPosts=new Set();
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let shownPosts = new Set();
 
-function uniqueKey(p){ return p.author+'-'+p.timestamp; }
-function renderMarkdown(md){ return DOMPurify.sanitize(marked.parse(md||'')); }
+function uniqueKey(p){ return (p.author||'') + '|' + (p.timestamp||''); }
+function renderMarkdown(md){ try { return DOMPurify.sanitize(marked.parse(md||'')); } catch(e){ return DOMPurify.sanitize(md||''); }
+
+}
 function makePostNode(p){
-  const d=document.createElement('div');d.className='post';
-  const meta=document.createElement('div');meta.className='meta';
-  const a=document.createElement('div');a.className='author';a.textContent=p.author||'unknown';
-  const t=document.createElement('div');t.className='time';t.textContent=new Date(p.timestamp).toLocaleString();
-  meta.appendChild(a);meta.appendChild(t);
-  const content=document.createElement('div');content.className='content';
-  content.innerHTML=renderMarkdown(p.content||'');
-  d.appendChild(meta);d.appendChild(content);
-  if(p.image){const img=document.createElement('img');img.className='post-image';img.src=p.image;img.alt='post image';d.appendChild(img);}
+  const d = document.createElement('div'); d.className = 'post post-bubble';
+  const meta = document.createElement('div'); meta.className='meta';
+  const a = document.createElement('div'); a.className='author'; a.textContent = p.author || 'unknown';
+  const t = document.createElement('div'); t.className='time'; t.textContent = new Date(p.timestamp).toLocaleString();
+  meta.appendChild(a); meta.appendChild(t);
+  const content = document.createElement('div'); content.className='content';
+  content.innerHTML = renderMarkdown(p.content || '');
+  d.appendChild(meta); d.appendChild(content);
+  if (p.image) {
+    const img = document.createElement('img'); img.className='post-image'; img.src = p.image; img.alt = 'post image';
+    d.appendChild(img);
+  }
   return d;
 }
-function prependPost(p,animate=true){const node=makePostNode(p);const container=$('posts');container.insertBefore(node,container.firstChild);shownPosts.add(uniqueKey(p));if(!animate){node.style.animation='none';node.style.opacity=1;}}
+function prependPost(p, animate=true){
+  const key = uniqueKey(p);
+  if (shownPosts.has(key)) return;
+  const node = makePostNode(p);
+  const container = $('posts');
+  container.insertBefore(node, container.firstChild);
+  shownPosts.add(key);
+  if (!animate) { node.style.animation = 'none'; node.style.opacity = 1; }
+}
 
+/* load all (server must return newest-first) */
 async function loadPosts(){
   try{
-    const res=await fetch('/posts');const arr=await res.json();
-    $('posts').innerHTML='';shownPosts.clear();
-    for(const p of arr) prependPost(p,false);
-  }catch(e){console.error('loadPosts',e);}
+    const res = await fetch('/posts');
+    const arr = await res.json();
+    // canonical: server returns newest-first
+    $('posts').innerHTML = '';
+    shownPosts.clear();
+    for (const p of arr) prependPost(p, false);
+  }catch(e){ console.error('loadPosts', e); }
 }
 
+/* whoami uses server-side validation (/me must validate against users.json) */
 async function whoami(){
-  try{const r=await fetch('/me');if(!r.ok)return null;const j=await r.json();return j.user||null;}catch(e){return null;}
+  try {
+    const r = await fetch('/me');
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.user || null;
+  } catch(e) { return null; }
 }
 
+/* UI state */
 async function refreshUI(){
-  currentUser=await whoami();
-  if(currentUser){
-    $('meName').textContent=currentUser;$('meSub').textContent='signed in';$('logoutBtn').style.display='inline-block';$('displayName').textContent=currentUser;
-  }else{
-    $('meName').textContent='';$('meSub').textContent='not signed in';$('logoutBtn').style.display='none';$('displayName').textContent='guest';
+  currentUser = await whoami();
+  if (currentUser) {
+    $('meName').textContent = currentUser;
+    $('meSub').textContent = 'signed in';
+    $('logoutBtn').style.display = 'inline-block';
+    $('displayName').textContent = currentUser;
+    $('authCard').style.display = 'none';        // hide auth UI when logged in
+  } else {
+    $('meName').textContent = '';
+    $('meSub').textContent = 'not signed in';
+    $('logoutBtn').style.display = 'none';
+    $('displayName').textContent = 'guest';
+    $('authCard').style.display = '';            // show auth UI when logged out
   }
 }
 
-let signingUp=false;
-$('toggleAuth').addEventListener('click',()=>{signingUp=!signingUp;$('authBtn').textContent=signingUp?'Sign up':'Login';$('toggleAuth').textContent=signingUp?'Have an account?':'Sign up';});
-$('authBtn').addEventListener('click',async()=>{
-  const u=$('u_name').value.trim(),p=$('u_pass').value.trim();
-  if(!u||!p)return alert('username + password required');
-  const ep=signingUp?'/signup':'/login';
-  try{
-    const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-    if(!res.ok){const j=await res.json().catch(()=>({}));return alert(j.error||'auth failed');}
-    $('u_name').value='';$('u_pass').value='';
-    await refreshUI();loadPosts();
-  }catch(e){alert('auth error');}
-});
-$('logoutBtn').addEventListener('click',async()=>{await fetch('/logout',{method:'POST'}).catch(()=>{});await refreshUI();});
-
-$('postBtn').addEventListener('click',async()=>{
-  const content=$('content').value.trim();
-  if(!content)return alert('write something first');if(!currentUser)return alert('must be logged in to post');
-  const fd=new FormData();fd.append('content',content);const file=$('image').files[0];if(file)fd.append('image',file);
-  try{
-    const res=await fetch('/posts',{method:'POST',body:fd});const j=await res.json();if(!res.ok)return alert(j.error||'post failed');
-    const newPost=j.post||j;
-    confetti({particleCount:60,spread:70,origin:{y:0.4}});
-    prependPost(newPost);$('content').value='';$('image').value='';$('preview').style.display='none';
-  }catch(e){console.error(e);alert('post error');}
+/* auth */
+let signingUp = false;
+$('toggleAuth').addEventListener('click', ()=>{
+  signingUp = !signingUp;
+  $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
+  $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
 });
 
-$('previewBtn').addEventListener('click',()=>{$('preview').innerHTML=renderMarkdown($('content').value||'');$('preview').style.display=$('preview').style.display==='none'?'block':'none';});
-$('refreshBtn').addEventListener('click',loadPosts);
-setInterval(()=>$('composerClock').textContent=new Date().toLocaleTimeString(),1000);
+$('authBtn').addEventListener('click', async ()=>{
+  const u = $('u_name').value.trim();
+  const p = $('u_pass').value.trim();
+  if (!u || !p) return alert('username + password required');
+  const ep = signingUp ? '/signup' : '/login';
+  try {
+    const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p }) });
+    const j = await res.json().catch(()=>({}));
+    if (!res.ok) return alert(j.error || 'auth failed');
+    $('u_name').value = ''; $('u_pass').value = '';
+    await refreshUI();
+    await loadPosts();
+  } catch(e) { alert('auth error'); }
+});
 
-(async function init(){await refreshUI();await loadPosts();})();
-setInterval(async()=>{
-  try{
-    const res=await fetch('/posts');const arr=await res.json();if(!Array.isArray(arr))return;
-    for(const p of arr){if(!shownPosts.has(uniqueKey(p))) prependPost(p);}
-  }catch(e){}
-},7000);
+$('logoutBtn').addEventListener('click', async ()=>{
+  await fetch('/logout',{ method:'POST' }).catch(()=>{});
+  // clear client state immediately
+  currentUser = null; shownPosts.clear();
+  await refreshUI();
+  await loadPosts();
+});
+
+/* file input / preview */
+$('image').addEventListener('change', (ev)=>{
+  const f = ev.target.files[0];
+  if (!f) { $('fileName').textContent = 'no file'; $('imagePreview').innerHTML = ''; return; }
+  $('fileName').textContent = f.name;
+  // show image preview client-side
+  if (f.type.startsWith('image/')) {
+    const url = URL.createObjectURL(f);
+    $('imagePreview').innerHTML = `<img src="${url}" alt="preview" style="max-width:100%;border-radius:8px">`;
+    // revoke object URL after image loads to free memory
+    const img = $('imagePreview').querySelector('img');
+    img.onload = () => URL.revokeObjectURL(url);
+  } else {
+    $('imagePreview').innerHTML = `<div style="color:var(--muted)">preview not available for this file type</div>`;
+  }
+});
+
+/* preview markdown + attached image in preview area */
+$('previewBtn').addEventListener('click', ()=>{
+  const raw = $('content').value || '';
+  const mdHtml = renderMarkdown(raw);
+  const f = $('image').files[0];
+  let imgHtml = '';
+  if (f && f.type.startsWith('image/')) {
+    const url = URL.createObjectURL(f);
+    imgHtml = `<div style="margin-top:8px"><img src="${url}" style="max-width:100%;border-radius:8px"></div>`;
+    // will be revoked on post or next change
+  }
+  $('preview').innerHTML = mdHtml + imgHtml;
+  $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
+});
+
+/* posting - prepend and avoid duplicate on next poll */
+$('postBtn').addEventListener('click', async ()=>{
+  const content = $('content').value.trim();
+  if (!content) return alert('write something first');
+  if (!currentUser) return alert('must be logged in to post');
+  const fd = new FormData();
+  fd.append('content', content);
+  const file = $('image').files[0];
+  if (file) fd.append('image', file);
+
+  try {
+    const res = await fetch('/posts', { method: 'POST', body: fd });
+    const j = await res.json().catch(()=>({}));
+    if (!res.ok) return alert(j.error || 'post failed');
+    const newPost = j.post || j;
+    // confetti
+    confetti({ particleCount: 60, spread: 80, origin: { y: 0.35 } });
+    prependPost(newPost);
+    // clear composer and preview and image preview objectURL
+    $('content').value = ''; $('image').value = ''; $('fileName').textContent = 'no file'; $('preview').style.display = 'none'; $('imagePreview').innerHTML = '';
+  } catch(e) { console.error(e); alert('post error'); }
+});
+
+/* refresh/load */
+$('refreshBtn').addEventListener('click', loadPosts);
+setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
+
+/* init and poll for new posts (append-only, skip shown) */
+(async function init(){
+  await refreshUI();
+  await loadPosts();
+})();
+setInterval(async ()=>{
+  try {
+    const res = await fetch('/posts');
+    const arr = await res.json();
+    if (!Array.isArray(arr)) return;
+    for (const p of arr) if (!shownPosts.has(uniqueKey(p))) prependPost(p);
+  } catch(e){}
+}, 7000);
 </script>
 </body>
 </html>
