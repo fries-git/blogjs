@@ -2,12 +2,64 @@
 <html>
 <head>
   <title>Mini Blog</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #f7f7f7;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    form {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .post {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .author {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .content {
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
   <h1>My Blog</h1>
   <form id="postForm">
     <input type="text" id="author" placeholder="Your name" required>
-    <textarea id="content" placeholder="Write something..." required></textarea>
+    <textarea id="content" rows="4" placeholder="Write something..." required></textarea>
     <button type="submit">Post</button>
   </form>
   <div id="posts"></div>
@@ -18,14 +70,18 @@
       const posts = await res.json();
       const container = document.getElementById('posts');
       container.innerHTML = posts.map(p =>
-        `<div><b>${p.author}</b>: ${p.content}</div>`
+        `<div class="post">
+          <div class="author">${p.author}</div>
+          <div class="content">${p.content}</div>
+        </div>`
       ).join('');
     }
 
     document.getElementById('postForm').onsubmit = async (e) => {
       e.preventDefault();
-      const author = document.getElementById('author').value;
-      const content = document.getElementById('content').value;
+      const author = document.getElementById('author').value.trim();
+      const content = document.getElementById('content').value.trim();
+      if (!author || !content) return;
       await fetch('/posts', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
