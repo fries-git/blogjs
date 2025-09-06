@@ -1,11 +1,13 @@
 {
   "name": "mini-blog",
   "version": "1.0.0",
+  "description": "Minimal blog with login and posts",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "cookie-parser": "^1.4.6"
   }
 }
