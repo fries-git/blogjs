@@ -1,7 +1,7 @@
 // blog.js
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 3000;
@@ -58,7 +58,7 @@ app.post('/signup', async (req, res) => {
     const existing = await findUser(username);
     if (existing) return res.status(400).json({ error: 'user exists' });
 
-    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const hash = bcrypt.hashSync(password, BCRYPT_ROUNDS);
     const { data, error } = await supabase
       .from('users')
       .insert([{ username, password_hash: hash }])
@@ -83,7 +83,7 @@ app.post('/login', async (req, res) => {
     const user = await findUser(username);
     if (!user) return res.status(401).json({ error: 'invalid credentials' });
 
-    const ok = await bcrypt.compare(password, user.password_hash);
+    const ok = bcrypt.compareSync(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
 
     res.cookie('user', user.username, { httpOnly: true, sameSite: 'lax' });
