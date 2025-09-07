@@ -12,6 +12,7 @@
       --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
       --soft-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
+    *{box-sizing:border-box}
     html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#0b0f12);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
     .wrap{max-width:880px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:18px}
     header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -24,7 +25,7 @@
     @keyframes lift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
     .author{font-weight:700;color:var(--accent2)}
-    .content{color:var(--ink);line-height:1.5}
+    .content{color:var(--ink);line-height:1.5;word-wrap:break-word}
     /* auth / composer */
     input, textarea, button{font-family:inherit}
     input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:#1a2129;color:var(--ink)}
@@ -138,9 +139,15 @@
     async function loadPosts(){
       const res = await fetch('/posts');
       const arr = await res.json();
+      // ensure newest-first by timestamp, then render in that order
+      arr.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
       $('posts').innerHTML = '';
       shown.clear();
-      for (const p of arr) prependPost(p);
+      for (const p of arr) {
+        const node = makePostEl(p);
+        $('posts').appendChild(node);
+        shown.add(p.id);
+      }
     }
 
     async function whoami(){
