@@ -1,244 +1,393 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Blog.js</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>blog.js</title>
 
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-  <style>
-    :root{
-      --bg:#f3efe8; --panel:#fff6ee; --muted:#8b7b74;
-      --accent:#d6a77a; --accent2:#eabf9f; --ink:#2f2a28;
-      --soft-shadow: 0 10px 30px rgba(47,42,40,0.08);
-    }
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#efe7de);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
-    .wrap{max-width:880px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:18px}
-    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    h1{margin:0;font-size:20px}
-    .sub{color:var(--muted);font-size:13px}
-    .card{background:var(--panel);border-radius:12px;padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(0,0,0,0.03)}
-    /* posts */
-    #posts{display:flex;flex-direction:column;gap:12px}
-    .post{padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff6f2);border:1px solid rgba(0,0,0,0.02);animation:lift .28s ease;overflow:hidden}
-    @keyframes lift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-    .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
-    .author{font-weight:700;color:var(--accent2)}
-    .content{color:var(--ink);line-height:1.5}
-    /* auth / composer */
-    input, textarea, button{font-family:inherit}
-    input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:#fff}
-    textarea{min-height:92px;resize:vertical}
-    .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#2b1f17;font-weight:700;cursor:pointer}
-    .muted{color:var(--muted);font-size:13px}
-    .ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:10px;cursor:pointer}
-    .cozy {font-size:13px;color:var(--muted)}
-    .charcount{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
-    @media (max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}}
-  </style>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<style>
+  :root{
+    --bg: #0b0f12;
+    --panel: #0f1417;
+    --muted: #9fb4c8;
+    --accent: #7ee7c7;
+    --accent2: #ff9ad0;
+    --ink: #e6eef3;
+    --card-shadow: 0 10px 30px rgba(2,6,10,0.6);
+  }
+
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1100px;margin:28px auto;padding:18px;display:grid;grid-template-columns:1fr 360px;gap:18px}
+  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{margin:0;font-size:20px;color:var(--accent)}
+  .sub{color:var(--muted);font-size:13px}
+  .card{background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.02));padding:14px;border-radius:12px;box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.03)}
+  .row{display:flex;gap:8px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  input[type=text], textarea, select {width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--ink);outline:none}
+  textarea{min-height:88px;resize:vertical}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061014;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:8px;cursor:pointer}
+  #posts{display:flex;flex-direction:column;gap:12px}
+  .post{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.02)}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
+  .author{font-weight:700;color:var(--accent)}
+  .content{line-height:1.45;color:var(--ink)}
+  .theme-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .small{font-size:13px;color:var(--muted)}
+  @media (max-width:960px){ .wrap{grid-template-columns:1fr;padding:12px} .right{order:2} }
+  /* small comfy touches */
+  .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
+  .preview-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Blog.js</h1>
-        <div class="sub">cozy. slow. markdown-friendly.</div>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>blog.js</h1>
+      <div class="sub">custom themes • saved locally • markdown-ready</div>
+    </div>
+
+    <div class="card" style="display:flex;gap:10px;align-items:center;min-width:240px;justify-content:flex-end">
+      <div class="small">Theme</div>
+      <select id="themeSelect" style="width:160px"></select>
+      <button id="editThemeBtn" class="ghost">Edit</button>
+    </div>
+  </header>
+
+  <!-- main feed -->
+  <main>
+    <section class="card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:800">Feed</div>
+      <div class="muted">Newest-first • 500 char limit • 15m cooldown</div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <input id="postAuthor" type="text" placeholder="Your name (username used for cooldown)" />
+        <div style="flex:1"></div>
+        <div class="small" id="charCount">500</div>
       </div>
-      <div class="card" style="display:flex;gap:10px;align-items:center">
-        <div style="min-width:160px">
-          <div id="meName" style="font-weight:800;color:var(--accent)"></div>
-          <div id="meSub" class="cozy">not signed in</div>
-        </div>
-        <div style="margin-left:auto">
-          <button id="logoutBtn" class="ghost" style="display:none">Logout</button>
-        </div>
+      <textarea id="postContent" maxlength="500" placeholder="Write something (markdown supported)"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="postBtn" class="btn">Post</button>
+        <button id="previewToggle" class="ghost">Preview</button>
       </div>
-    </header>
+      <div id="preview" class="preview-card" style="margin-top:10px;display:none"></div>
+    </section>
 
-    <!-- feed column -->
-    <main>
-      <section class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:800">Feed</div>
-        <div class="muted">Newest at top • 500 char limit • 15m cooldown</div>
-      </section>
+    <div id="posts" style="margin-top:12px"></div>
+  </main>
 
-      <div id="posts"></div>
-    </main>
+  <!-- right: theme editor -->
+  <aside class="right">
+    <section id="themeEditor" class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-weight:800">Theme Editor</div>
+        <div class="small">edit & save</div>
+      </div>
+      <div style="height:10px"></div>
 
-    <!-- right column -->
-    <aside>
-      <section id="authCard" class="card">
-        <div style="font-weight:700;margin-bottom:8px">Account</div>
-        <input id="u_name" placeholder="username" />
-        <div style="height:8px"></div>
-        <input id="u_pass" type="password" placeholder="password" />
-        <div style="height:10px"></div>
-        <div style="display:flex;gap:8px">
-          <button id="authBtn" class="btn">Login</button>
-          <button id="toggleAuth" class="ghost">Sign up</button>
-        </div>
-        <div style="height:10px"></div>
-        <div class="cozy">view only if not signed in</div>
-      </section>
+      <div style="margin-bottom:8px">
+        <input id="themeName" type="text" placeholder="new theme name" />
+      </div>
 
-      <section id="composer" class="card" style="margin-top:14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-weight:700" id="displayName">guest</div>
-          <div id="composerClock" class="cozy" style="margin-left:auto"></div>
-        </div>
-        <textarea id="content" maxlength="500" placeholder="Write something gentle and short..."></textarea>
-        <div class="charcount"><span id="charsLeft">500</span> chars left</div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button id="postBtn" class="btn">Post • ✨</button>
-          <button id="previewBtn" class="ghost">Preview</button>
-        </div>
-        <div id="preview" class="card" style="margin-top:10px;display:none"></div>
-      </section>
-    </aside>
-  </div>
+      <div class="theme-inputs" style="margin-bottom:8px">
+        <input id="t_bg" type="text" placeholder="--bg (bg color)" />
+        <input id="t_panel" type="text" placeholder="--panel" />
+        <input id="t_ink" type="text" placeholder="--ink" />
+        <input id="t_accent" type="text" placeholder="--accent" />
+      </div>
 
-  <!-- libs -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="saveThemeBtn" class="btn">Save Theme</button>
+        <button id="deleteThemeBtn" class="ghost">Delete</button>
+      </div>
 
-  <script>
-    const $ = id => document.getElementById(id);
-    const CHAR_LIMIT = 500;
-    const EXEMPT = 'fries';
-    let currentUser = null;
-    let shown = new Set();
+      <div style="height:10px"></div>
+      <div class="small">Presets included; create your own and they persist locally.</div>
+    </section>
+  </aside>
+</div>
 
-    function renderMd(md){
-      try { return DOMPurify.sanitize(marked.parse(md||'')); }
-      catch(e){ return DOMPurify.sanitize(md||''); }
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+/* Theme system */
+const presets = {
+  "dark-cozy": {
+    "--bg":"#0b0f12","--panel":"#0f1417","--muted":"#9fb4c8","--accent":"#7ee7c7","--accent2":"#ff9ad0","--ink":"#e6eef3"
+  },
+  "cozy-warm": {
+    "--bg":"#f3efe8","--panel":"#fff6ee","--muted":"#8b7b74","--accent":"#d6a77a","--accent2":"#eabf9f","--ink":"#2f2a28"
+  },
+  "playful": {
+    "--bg":"#0f1020","--panel":"#131223","--muted":"#c6d8ff","--accent":"#ffb86b","--accent2":"#ff6bcb","--ink":"#f0f6ff"
+  },
+  "light-simple": {
+    "--bg":"#f7f7f7","--panel":"#ffffff","--muted":"#6b6b6b","--accent":"#6c9c7a","--accent2":"#9ec8c1","--ink":"#222"
+  }
+};
+
+const LS_THEMES_KEY = 'blogjs_custom_themes_v1';
+const LS_ACTIVE_KEY = 'blogjs_active_theme_v1';
+const LS_POSTS_KEY = 'blogjs_posts_v1';
+const LS_LASTPOST_KEY = 'blogjs_lastposts_v1'; // map username -> timestamp
+
+function loadCustomThemes(){ try{ const raw = localStorage.getItem(LS_THEMES_KEY); return raw ? JSON.parse(raw) : {}; }catch(e){return{}}}
+function saveCustomThemes(obj){ localStorage.setItem(LS_THEMES_KEY, JSON.stringify(obj)); }
+function getAllThemes(){ return Object.assign({}, presets, loadCustomThemes()); }
+
+const themeSelect = document.getElementById('themeSelect');
+const editThemeBtn = document.getElementById('editThemeBtn');
+const themeEditor = document.getElementById('themeEditor');
+const themeNameInput = document.getElementById('themeName');
+const saveThemeBtn = document.getElementById('saveThemeBtn');
+const deleteThemeBtn = document.getElementById('deleteThemeBtn');
+const t_bg = document.getElementById('t_bg');
+const t_panel = document.getElementById('t_panel');
+const t_ink = document.getElementById('t_ink');
+const t_accent = document.getElementById('t_accent');
+
+function applyTheme(themeObj){
+  const root = document.documentElement;
+  for (const k in themeObj) root.style.setProperty(k, themeObj[k]);
+}
+function applyThemeByName(name){
+  const themes = getAllThemes();
+  const t = themes[name];
+  if (!t) return;
+  applyTheme(t);
+  localStorage.setItem(LS_ACTIVE_KEY, name);
+  populateThemeInputs(t);
+  themeSelect.value = name;
+}
+function populateThemeSelector(){
+  const themes = getAllThemes();
+  themeSelect.innerHTML = '';
+  Object.keys(themes).forEach(n=>{
+    const opt = document.createElement('option'); opt.value = n; opt.textContent = n;
+    themeSelect.appendChild(opt);
+  });
+}
+function populateThemeInputs(t){
+  t = t || {};
+  t_bg.value = t['--bg'] || '';
+  t_panel.value = t['--panel'] || '';
+  t_ink.value = t['--ink'] || '';
+  t_accent.value = t['--accent'] || '';
+}
+
+themeSelect.addEventListener('change', ()=> applyThemeByName(themeSelect.value));
+editThemeBtn.addEventListener('click', ()=> themeEditor.classList.toggle('open') );
+saveThemeBtn.addEventListener('click', ()=>{
+  const name = (themeNameInput.value || themeSelect.value || 'custom').trim();
+  if (!name) return alert('give the theme a name');
+  const custom = loadCustomThemes();
+  custom[name] = {
+    "--bg": t_bg.value || getComputedStyle(document.documentElement).getPropertyValue('--bg'),
+    "--panel": t_panel.value || getComputedStyle(document.documentElement).getPropertyValue('--panel'),
+    "--ink": t_ink.value || getComputedStyle(document.documentElement).getPropertyValue('--ink'),
+    "--accent": t_accent.value || getComputedStyle(document.documentElement).getPropertyValue('--accent')
+  };
+  saveCustomThemes(custom);
+  populateThemeSelector();
+  applyThemeByName(name);
+  alert('theme saved locally');
+});
+deleteThemeBtn.addEventListener('click', ()=>{
+  const name = themeSelect.value;
+  if (!name) return;
+  if (presets[name]) return alert('cannot delete preset');
+  const custom = loadCustomThemes();
+  if (!custom[name]) return alert('no custom theme selected');
+  if (!confirm('Delete theme \"' + name + '\"?')) return;
+  delete custom[name];
+  saveCustomThemes(custom);
+  populateThemeSelector();
+  const first = themeSelect.options[0]?.value;
+  if (first) applyThemeByName(first);
+});
+
+// init theme UI
+populateThemeSelector();
+const active = localStorage.getItem(LS_ACTIVE_KEY) || Object.keys(presets)[0];
+applyThemeByName(active);
+
+// POSTS: local store with optional server sync
+const postBtn = document.getElementById('postBtn');
+const postAuthor = document.getElementById('postAuthor');
+const postContent = document.getElementById('postContent');
+const postsEl = document.getElementById('posts');
+const preview = document.getElementById('preview');
+const previewToggle = document.getElementById('previewToggle');
+const charCount = document.getElementById('charCount');
+
+const CHAR_LIMIT = 500;
+const COOLDOWN_MS = 15 * 60 * 1000;
+const EXEMPT = 'fries';
+
+function loadLocalPosts(){
+  try{
+    const raw = localStorage.getItem(LS_POSTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return [];}
+}
+function saveLocalPosts(arr){ localStorage.setItem(LS_POSTS_KEY, JSON.stringify(arr)); }
+
+function loadLastPostsMap(){ try{ const raw = localStorage.getItem(LS_LASTPOST_KEY); return raw ? JSON.parse(raw) : {}; }catch(e){return{} } }
+function saveLastPostsMap(mp){ localStorage.setItem(LS_LASTPOST_KEY, JSON.stringify(mp)); }
+
+let LOCAL_POSTS = loadLocalPosts(); // newest-first
+function renderPosts(){
+  postsEl.innerHTML = '';
+  for (const p of LOCAL_POSTS){
+    const d = document.createElement('div'); d.className = 'post';
+    d.innerHTML = `
+      <div class="meta"><div class="author">${escapeHtml(p.author)}</div><div class="small">${new Date(p.timestamp).toLocaleString()}</div></div>
+      <div class="content">${DOMPurify.sanitize(marked.parse(p.content || ''))}</div>
+    `;
+    postsEl.appendChild(d);
+  }
+}
+
+// when posting: try server POST /posts; if 200 use server response; else fallback to local store
+async function submitPost(){
+  const author = (postAuthor.value || 'anon').trim();
+  const content = postContent.value.trim();
+  if (!content) return alert('write something first');
+  if (content.length > CHAR_LIMIT) return alert('max 500 chars');
+
+  // cooldown
+  if (author.toLowerCase() !== EXEMPT){
+    const lastMap = loadLastPostsMap();
+    const last = lastMap[author] ? new Date(lastMap[author]).getTime() : 0;
+    const now = Date.now();
+    if (now - last < COOLDOWN_MS) {
+      const left = Math.ceil((COOLDOWN_MS - (now - last))/60000);
+      return alert(`cooldown active — wait ${left}m`);
     }
+  }
 
-    function makePostEl(p){
+  // try server
+  let usePost = null;
+  try{
+    const resp = await fetch('/posts', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ content, author })
+    });
+    if (resp.ok){
+      const j = await resp.json();
+      usePost = j.post || j;
+    }
+  }catch(e){ /* server unavailable, fallback to local */ }
+
+  if (!usePost){
+    usePost = { id: Date.now().toString(36), author, content, timestamp: new Date().toISOString() };
+    LOCAL_POSTS.unshift(usePost);
+    saveLocalPosts(LOCAL_POSTS);
+  } else {
+    // server returned a post object; still store locally for UI continuity
+    LOCAL_POSTS.unshift(usePost);
+    saveLocalPosts(LOCAL_POSTS);
+  }
+
+  // update last post map
+  const lastMap = loadLastPostsMap();
+  lastMap[author] = usePost.timestamp;
+  saveLastPostsMap(lastMap);
+
+  // UI updates
+  renderPosts();
+  postContent.value = '';
+  charCount.textContent = CHAR_LIMIT;
+  preview.style.display = 'none';
+  runConfetti();
+}
+
+// preview and charcount
+postContent.addEventListener('input', ()=> charCount.textContent = CHAR_LIMIT - postContent.value.length);
+previewToggle.addEventListener('click', ()=>{
+  if (preview.style.display === 'none' || preview.style.display === '') {
+    preview.innerHTML = DOMPurify.sanitize(marked.parse(postContent.value || ''));
+    preview.style.display = 'block';
+  } else { preview.style.display = 'none'; }
+});
+postBtn.addEventListener('click', submitPost);
+
+// initial render
+renderPosts();
+
+// small confetti
+function runConfetti(){
+  try{
+    confetti({ particleCount: 60, spread: 60, origin: { y: 0.4 }});
+  }catch(e){
+    // fallback tiny squares
+    for (let i=0;i<30;i++){
       const el = document.createElement('div');
-      el.className = 'post';
-      el.innerHTML = `
-        <div class="meta">
-          <div class="author">${escapeHtml(p.author)}</div>
-          <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
-        </div>
-        <div class="content">${renderMd(p.content||'')}</div>
-      `;
-      return el;
+      el.style.position='fixed';
+      el.style.left = (50 + (Math.random()-0.5)*60) + 'vw';
+      el.style.top = '-5vh';
+      el.style.width = el.style.height = (6 + Math.random()*8) + 'px';
+      el.style.background = 'hsl(' + Math.floor(Math.random()*360) + ',70%,60%)';
+      el.style.opacity = Math.random()*0.9 + 0.4;
+      el.style.borderRadius = '2px';
+      el.style.zIndex = 9999;
+      document.body.appendChild(el);
+      const fall = 1200 + Math.random()*1000;
+      el.animate([{ transform: 'translateY(0)', opacity:1 }, { transform: 'translateY(110vh)', opacity:0 }], { duration: fall, iterations:1, easing:'cubic-bezier(.2,.8,.2,1)'});
+      setTimeout(()=> el.remove(), fall+100);
     }
+  }
+}
 
-    function prependPost(p){
-      if (!p || !p.id) return;
-      if (shown.has(p.id)) return;
-      const node = makePostEl(p);
-      $('posts').insertBefore(node, $('posts').firstChild);
-      shown.add(p.id);
-    }
+// helpers
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
-    async function loadPosts(){
-      const res = await fetch('/posts');
-      const arr = await res.json();
-      $('posts').innerHTML = '';
-      shown.clear();
-      for (const p of arr) prependPost(p);
-    }
+// optional: sync any locally stored posts to server (call manually)
+async function syncLocalToServer(){
+  const arr = loadLocalPosts();
+  for (const p of arr.slice().reverse()){ // oldest-first
+    try{
+      const resp = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content: p.content, author: p.author })});
+      if (resp.ok){
+        // remove local copy on success
+        const idx = LOCAL_POSTS.findIndex(x=>x.id===p.id);
+        if (idx !== -1) LOCAL_POSTS.splice(idx,1);
+      }
+    }catch(e){}
+  }
+  saveLocalPosts(LOCAL_POSTS);
+}
 
-    async function whoami(){
-      try{
-        const r = await fetch('/me');
-        if (!r.ok) return { user: null };
-        return await r.json();
-      } catch { return { user: null }; }
-    }
+// expose tiny dev helpers (optional)
+window.blogjs = { syncLocalToServer, loadLocalPosts, saveLocalPosts, runConfetti };
 
-    async function refreshUI(){
-      const m = await whoami();
-      currentUser = m.user || null;
-      if (currentUser){
-        $('meName').textContent = currentUser;
-        $('meSub').textContent = 'signed in';
-        $('logoutBtn').style.display = 'inline-block';
-        $('displayName').textContent = currentUser;
-        $('authCard').style.display = 'none';
-      } else {
-        $('meName').textContent = '';
-        $('meSub').textContent = 'not signed in';
-        $('logoutBtn').style.display = 'none';
-        $('displayName').textContent = 'guest';
-        $('authCard').style.display = '';
+// defensive: keep UI responsive if server returns new posts (poll)
+setInterval(async ()=>{
+  try{
+    const r = await fetch('/posts');
+    if (!r.ok) return;
+    const arr = await r.json();
+    // merge server posts into LOCAL_POSTS, avoid duplicates by id
+    const ids = new Set(LOCAL_POSTS.map(p=>p.id));
+    for (const p of arr){
+      if (!ids.has(p.id)){
+        LOCAL_POSTS.unshift(p);
+        ids.add(p.id);
       }
     }
-
-    // auth flows
-    let signingUp = false;
-    $('toggleAuth').addEventListener('click', ()=> {
-      signingUp = !signingUp;
-      $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
-      $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
-    });
-
-    $('authBtn').addEventListener('click', async ()=>{
-      const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
-      if (!u || !p) return alert('username + password required');
-      const ep = signingUp ? '/signup' : '/login';
-      const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p })});
-      const j = await res.json().catch(()=>({}));
-      if (!res.ok) return alert(j.error || 'auth failed');
-      $('u_name').value=''; $('u_pass').value='';
-      await refreshUI();
-      await loadPosts();
-    });
-
-    $('logoutBtn').addEventListener('click', async ()=>{
-      await fetch('/logout',{ method:'POST' }).catch(()=>{});
-      currentUser = null; shown.clear();
-      await refreshUI();
-      await loadPosts();
-    });
-
-    // composer
-    $('content').addEventListener('input', ()=> {
-      const left = CHAR_LIMIT - $('content').value.length;
-      $('charsLeft').textContent = left;
-    });
-
-    $('previewBtn').addEventListener('click', ()=> {
-      const raw = $('content').value || '';
-      $('preview').innerHTML = renderMd(raw);
-      $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
-    });
-
-    $('postBtn').addEventListener('click', async ()=>{
-      const content = $('content').value.trim();
-      if (!content) return alert('write something first');
-      if (content.length > CHAR_LIMIT) return alert(`max ${CHAR_LIMIT} chars`);
-      if (!currentUser) return alert('log in to post');
-
-      const res = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content })});
-      const j = await res.json().catch(()=>({}));
-      if (!res.ok) return alert(j.error || 'post failed');
-      const newPost = j.post || j;
-      confetti({ particleCount: 45, spread: 70, origin: { y: 0.35 }});
-      prependPost(newPost);
-      $('content').value = ''; $('charsLeft').textContent = CHAR_LIMIT; $('preview').style.display='none';
-    });
-
-    // helpers
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
-
-    // init
-    (async function init(){
-      await refreshUI();
-      await loadPosts();
-      setInterval(async ()=>{
-        try{
-          const res = await fetch('/posts');
-          const arr = await res.json();
-          for (const p of arr) if (!shown.has(p.id)) prependPost(p);
-        }catch(e){}
-      },7000);
-      setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
-    })();
-  </script>
+    saveLocalPosts(LOCAL_POSTS);
+    renderPosts();
+  }catch(e){}
+}, 8000);
+</script>
 </body>
 </html>
