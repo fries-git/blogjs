@@ -4,7 +4,7 @@
   "description": "Cozy Calm Social — Supabase-backed blog with markdown",
   "main": "blog.js",
   "scripts": {
-    "start": "node blog.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
