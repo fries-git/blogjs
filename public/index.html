@@ -1,239 +1,244 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>✨ Calm Social ✨</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calm Blog — cozy</title>
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <style>
-    body {
-      margin: 0;
-      font-family: "Comic Neue", "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      color: #eee;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+    :root{
+      --bg:#f3efe8; --panel:#fff6ee; --muted:#8b7b74;
+      --accent:#d6a77a; --accent2:#eabf9f; --ink:#2f2a28;
+      --soft-shadow: 0 10px 30px rgba(47,42,40,0.08);
     }
-
-    header {
-      padding: 1rem;
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #ffda79;
-      text-shadow: 0 0 10px #ffda79aa;
-    }
-
-    .container {
-      width: 95%;
-      max-width: 700px;
-      background: #222;
-      border-radius: 20px;
-      padding: 1rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-      margin-bottom: 2rem;
-    }
-
-    .hidden { display: none; }
-
-    input, textarea, button {
-      font-family: inherit;
-      padding: 0.5rem;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      margin: 0.25rem 0;
-    }
-
-    input, textarea {
-      width: 100%;
-    }
-
-    button {
-      background: #ff6b81;
-      color: #fff;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button:hover { transform: scale(1.05); }
-
-    #posts {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .post {
-      background: #2a2a40;
-      border-radius: 15px;
-      padding: 1rem;
-      animation: fadeIn 0.5s ease;
-      position: relative;
-    }
-    .post::before {
-      content: "💬";
-      position: absolute;
-      left: -1.5rem;
-      top: 0.5rem;
-    }
-    .author { font-weight: bold; color: #9be7ff; }
-    .timestamp { font-size: 0.8rem; color: #bbb; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#efe7de);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
+    .wrap{max-width:880px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:18px}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;font-size:20px}
+    .sub{color:var(--muted);font-size:13px}
+    .card{background:var(--panel);border-radius:12px;padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(0,0,0,0.03)}
+    /* posts */
+    #posts{display:flex;flex-direction:column;gap:12px}
+    .post{padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff6f2);border:1px solid rgba(0,0,0,0.02);animation:lift .28s ease;overflow:hidden}
+    @keyframes lift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
+    .author{font-weight:700;color:var(--accent2)}
+    .content{color:var(--ink);line-height:1.5}
+    /* auth / composer */
+    input, textarea, button{font-family:inherit}
+    input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:#fff}
+    textarea{min-height:92px;resize:vertical}
+    .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#2b1f17;font-weight:700;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+    .ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:10px;cursor:pointer}
+    .cozy {font-size:13px;color:var(--muted)}
+    .charcount{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
+    @media (max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}}
   </style>
 </head>
 <body>
-  <header>🌸 Calm Social 🌸</header>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🌿 Calm Blog</h1>
+        <div class="sub">cozy. slow. markdown-friendly.</div>
+      </div>
+      <div class="card" style="display:flex;gap:10px;align-items:center">
+        <div style="min-width:160px">
+          <div id="meName" style="font-weight:800;color:var(--accent)"></div>
+          <div id="meSub" class="cozy">not signed in</div>
+        </div>
+        <div style="margin-left:auto">
+          <button id="logoutBtn" class="ghost" style="display:none">Logout</button>
+        </div>
+      </div>
+    </header>
 
-  <div class="container" id="authBox">
-    <h3>Login / Signup</h3>
-    <input id="username" placeholder="Username"/>
-    <input id="password" type="password" placeholder="Password"/>
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="login()">Login</button>
+    <!-- feed column -->
+    <main>
+      <section class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Feed</div>
+        <div class="muted">Newest at top • 500 char limit • 15m cooldown</div>
+      </section>
+
+      <div id="posts"></div>
+    </main>
+
+    <!-- right column -->
+    <aside>
+      <section id="authCard" class="card">
+        <div style="font-weight:700;margin-bottom:8px">Account</div>
+        <input id="u_name" placeholder="username" />
+        <div style="height:8px"></div>
+        <input id="u_pass" type="password" placeholder="password" />
+        <div style="height:10px"></div>
+        <div style="display:flex;gap:8px">
+          <button id="authBtn" class="btn">Login</button>
+          <button id="toggleAuth" class="ghost">Sign up</button>
+        </div>
+        <div style="height:10px"></div>
+        <div class="cozy">view only if not signed in</div>
+      </section>
+
+      <section id="composer" class="card" style="margin-top:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-weight:700" id="displayName">guest</div>
+          <div id="composerClock" class="cozy" style="margin-left:auto"></div>
+        </div>
+        <textarea id="content" maxlength="500" placeholder="Write something gentle and short..."></textarea>
+        <div class="charcount"><span id="charsLeft">500</span> chars left</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="postBtn" class="btn">Post • ✨</button>
+          <button id="previewBtn" class="ghost">Preview</button>
+        </div>
+        <div id="preview" class="card" style="margin-top:10px;display:none"></div>
+      </section>
+    </aside>
   </div>
 
-  <div class="container hidden" id="postBox">
-    <div id="welcome"></div>
-    <textarea id="content" maxlength="500" placeholder="Share something nice (max 500 chars)..."></textarea>
-    <button onclick="sendPost()">Post</button>
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <div class="container">
-    <h3>Feed</h3>
-    <div id="posts"></div>
-  </div>
-
-  <canvas id="confettiCanvas"></canvas>
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <script>
-    async function me() {
-      const res = await fetch('/me');
-      const { user } = await res.json();
-      if (user) {
-        document.getElementById('authBox').classList.add('hidden');
-        document.getElementById('postBox').classList.remove('hidden');
-        document.getElementById('welcome').innerText = "Welcome, " + user + " 🌟";
-      }
+    const $ = id => document.getElementById(id);
+    const CHAR_LIMIT = 500;
+    const EXEMPT = 'fries';
+    let currentUser = null;
+    let shown = new Set();
+
+    function renderMd(md){
+      try { return DOMPurify.sanitize(marked.parse(md||'')); }
+      catch(e){ return DOMPurify.sanitize(md||''); }
     }
 
-    async function signup() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const res = await fetch('/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      if (res.ok) { await me(); loadPosts(); }
-      else alert('Signup failed');
+    function makePostEl(p){
+      const el = document.createElement('div');
+      el.className = 'post';
+      el.innerHTML = `
+        <div class="meta">
+          <div class="author">${escapeHtml(p.author)}</div>
+          <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
+        </div>
+        <div class="content">${renderMd(p.content||'')}</div>
+      `;
+      return el;
     }
 
-    async function login() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const res = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      if (res.ok) { await me(); loadPosts(); }
-      else alert('Login failed');
+    function prependPost(p){
+      if (!p || !p.id) return;
+      if (shown.has(p.id)) return;
+      const node = makePostEl(p);
+      $('posts').insertBefore(node, $('posts').firstChild);
+      shown.add(p.id);
     }
 
-    async function logout() {
-      await fetch('/logout', { method: 'POST' });
-      document.getElementById('authBox').classList.remove('hidden');
-      document.getElementById('postBox').classList.add('hidden');
-    }
-
-    async function loadPosts() {
+    async function loadPosts(){
       const res = await fetch('/posts');
-      const posts = await res.json();
-      const postsDiv = document.getElementById('posts');
-      postsDiv.innerHTML = "";
-      posts.forEach(p => {
-        const div = document.createElement('div');
-        div.className = "post";
-        div.innerHTML = `<div class="author">@${p.author}</div>
-                         <div class="content">${escapeHTML(p.content)}</div>
-                         <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>`;
-        postsDiv.appendChild(div);
-      });
+      const arr = await res.json();
+      $('posts').innerHTML = '';
+      shown.clear();
+      for (const p of arr) prependPost(p);
     }
 
-    async function sendPost() {
-      const content = document.getElementById('content').value;
-      if (!content.trim()) return;
-      const res = await fetch('/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
-      });
-      if (res.ok) {
-        document.getElementById('content').value = "";
-        loadPosts();
-        launchConfetti();
+    async function whoami(){
+      try{
+        const r = await fetch('/me');
+        if (!r.ok) return { user: null };
+        return await r.json();
+      } catch { return { user: null }; }
+    }
+
+    async function refreshUI(){
+      const m = await whoami();
+      currentUser = m.user || null;
+      if (currentUser){
+        $('meName').textContent = currentUser;
+        $('meSub').textContent = 'signed in';
+        $('logoutBtn').style.display = 'inline-block';
+        $('displayName').textContent = currentUser;
+        $('authCard').style.display = 'none';
       } else {
-        const err = await res.json();
-        alert(err.error || "Error");
+        $('meName').textContent = '';
+        $('meSub').textContent = 'not signed in';
+        $('logoutBtn').style.display = 'none';
+        $('displayName').textContent = 'guest';
+        $('authCard').style.display = '';
       }
     }
 
-    function escapeHTML(str) {
-      return str.replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-      }[m]));
-    }
+    // auth flows
+    let signingUp = false;
+    $('toggleAuth').addEventListener('click', ()=> {
+      signingUp = !signingUp;
+      $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
+      $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
+    });
 
-    // confetti
-    const canvas = document.getElementById('confettiCanvas');
-    const ctx = canvas.getContext('2d');
-    let confetti = [];
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    $('authBtn').addEventListener('click', async ()=>{
+      const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
+      if (!u || !p) return alert('username + password required');
+      const ep = signingUp ? '/signup' : '/login';
+      const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p })});
+      const j = await res.json().catch(()=>({}));
+      if (!res.ok) return alert(j.error || 'auth failed');
+      $('u_name').value=''; $('u_pass').value='';
+      await refreshUI();
+      await loadPosts();
+    });
 
-    function launchConfetti() {
-      for (let i = 0; i < 100; i++) {
-        confetti.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height - canvas.height,
-          r: Math.random() * 6 + 4,
-          d: Math.random() * 40 + 10,
-          color: `hsl(${Math.random()*360},100%,50%)`,
-          tilt: Math.random() * 10 - 10
-        });
-      }
-    }
-    function drawConfetti() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      confetti.forEach(c => {
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
-        ctx.fillStyle = c.color;
-        ctx.fill();
-      });
-      updateConfetti();
-    }
-    function updateConfetti() {
-      confetti.forEach(c => {
-        c.y += c.d/20;
-        if (c.y > canvas.height) c.y = -10;
-      });
-    }
-    setInterval(drawConfetti, 30);
+    $('logoutBtn').addEventListener('click', async ()=>{
+      await fetch('/logout',{ method:'POST' }).catch(()=>{});
+      currentUser = null; shown.clear();
+      await refreshUI();
+      await loadPosts();
+    });
 
-    me();
-    loadPosts();
+    // composer
+    $('content').addEventListener('input', ()=> {
+      const left = CHAR_LIMIT - $('content').value.length;
+      $('charsLeft').textContent = left;
+    });
+
+    $('previewBtn').addEventListener('click', ()=> {
+      const raw = $('content').value || '';
+      $('preview').innerHTML = renderMd(raw);
+      $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
+    });
+
+    $('postBtn').addEventListener('click', async ()=>{
+      const content = $('content').value.trim();
+      if (!content) return alert('write something first');
+      if (content.length > CHAR_LIMIT) return alert(`max ${CHAR_LIMIT} chars`);
+      if (!currentUser) return alert('log in to post');
+
+      const res = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content })});
+      const j = await res.json().catch(()=>({}));
+      if (!res.ok) return alert(j.error || 'post failed');
+      const newPost = j.post || j;
+      confetti({ particleCount: 45, spread: 70, origin: { y: 0.35 }});
+      prependPost(newPost);
+      $('content').value = ''; $('charsLeft').textContent = CHAR_LIMIT; $('preview').style.display='none';
+    });
+
+    // helpers
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+    // init
+    (async function init(){
+      await refreshUI();
+      await loadPosts();
+      setInterval(async ()=>{
+        try{
+          const res = await fetch('/posts');
+          const arr = await res.json();
+          for (const p of arr) if (!shown.has(p.id)) prependPost(p);
+        }catch(e){}
+      },7000);
+      setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
+    })();
   </script>
 </body>
 </html>
