@@ -4,35 +4,69 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>blog.js</title>
-
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <style>
   :root{
-    --bg:#0b0f12; --panel:#0f1417; --muted:#9fb4c8;
+    --bg:#081017; --panel:#0f1417; --muted:#98b4c6;
     --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
+    --glass: rgba(255,255,255,0.03);
+    --card-shadow: 0 12px 40px rgba(2,6,10,0.6);
+    --soft-radius:14px;
   }
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1100px;margin:28px auto;padding:18px;display:grid;grid-template-columns:1fr 320px;gap:18px}
-  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
-  h1{margin:0;color:var(--accent)}
+
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:
+    radial-gradient(900px 400px at 10% 10%, rgba(126,231,199,0.03), transparent 6%),
+    radial-gradient(700px 300px at 90% 90%, rgba(255,154,208,0.02), transparent 6%),
+    var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+
+  .wrap{max-width:1080px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{margin:0;font-size:20px;color:var(--accent);letter-spacing:.2px}
   .sub{color:var(--muted);font-size:13px}
-  .card{background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.02));padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,10,0.6)}
-  input[type=text], textarea, select {width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--ink);outline:none}
-  textarea{min-height:88px;resize:vertical}
-  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061014;padding:8px 12px;border-radius:10px;cursor:pointer}
-  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:8px;cursor:pointer}
-  #posts{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-  .post{display:flex;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.02);align-items:flex-start}
-  .meta{display:flex;flex-direction:column;gap:6px}
-  .author{color:var(--accent);font-weight:700}
-  .time{color:var(--muted);font-size:12px}
-  .content{line-height:1.45;color:var(--ink);max-width:880px;word-wrap:break-word}
-  .avatar{width:48px;height:48px;border-radius:10px;flex:0 0 48px;object-fit:cover;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#061014;font-weight:700}
-  .avatar.initials{font-size:14px}
+
+  .card{background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.01));padding:14px;border-radius:var(--soft-radius);box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.03);transition:transform .18s ease,box-shadow .18s ease}
+  .card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(2,6,10,0.7)}
+
+  input[type=text], input[type=password], textarea, select {
+    width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:var(--ink);outline:none;transition:box-shadow .12s, transform .08s;
+  }
+  input:focus, textarea:focus { box-shadow:0 6px 20px rgba(0,0,0,0.4); transform:translateY(-1px); }
+
+  textarea{min-height:96px;resize:vertical}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061014;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;transition:transform .12s}
+  .btn:active{transform:translateY(1px)}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:10px;cursor:pointer}
+
+  .row{display:flex;gap:8px;align-items:center}
   .small{font-size:13px;color:var(--muted)}
-  .preview-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;margin-top:8px}
-  .avatar-controls{display:flex;gap:8px;align-items:center;margin-top:8px}
-  @media (max-width:920px){.wrap{grid-template-columns:1fr;padding:12px}.right{order:2}}
+
+  /* posts */
+  #posts{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+  .post{display:flex;gap:12px;padding:14px;border-radius:12px;background:
+    linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.02);
+    align-items:flex-start;opacity:0;transform:translateY(10px) scale(.995);animation:pop .38s forwards}
+  @keyframes pop{to{opacity:1;transform:none}}
+  .meta{display:flex;flex-direction:column;gap:6px}
+  .author{color:var(--accent);font-weight:800}
+  .time{color:var(--muted);font-size:12px}
+  .content{line-height:1.53;color:var(--ink);max-width:880px;word-break:break-word}
+
+  /* avatar */
+  .avatar{width:56px;height:56px;border-radius:12px;flex:0 0 56px;object-fit:cover;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#061014;font-weight:800}
+  .avatar.initials{font-size:14px}
+
+  /* composer small */
+  .composer-meta{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .char-count{margin-left:auto;color:var(--muted);font-size:13px}
+
+  /* preview */
+  .preview-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;margin-top:10px}
+
+  /* subtle hover for posts */
+  .post:hover{transform:translateY(-6px);box-shadow:0 18px 50px rgba(0,0,0,0.45)}
+  .muted-note{color:var(--muted);font-size:13px;margin-top:8px}
+
+  @media (max-width:960px){ .wrap{grid-template-columns:1fr;padding:12px} .right{order:2} }
 </style>
 </head>
 <body>
@@ -40,59 +74,75 @@
   <header>
     <div>
       <h1>blog.js</h1>
-      <div class="sub">presets themes • avatars • markdown-ready</div>
+      <div class="sub">calm posts • presets themes • avatars • markdown</div>
     </div>
 
-    <div class="card" style="display:flex;gap:10px;align-items:center">
+    <div class="card" style="display:flex;gap:12px;align-items:center;min-width:220px;justify-content:flex-end">
       <div class="small">Theme</div>
       <select id="themeSelect" style="width:160px"></select>
     </div>
   </header>
 
-  <!-- main feed & composer -->
   <main>
-    <section class="card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+    <section class="card" style="display:flex;align-items:center;justify-content:space-between">
       <div style="font-weight:800">Feed</div>
-      <div class="small">Newest-first • 500 chars • 15m cooldown (fries exempt)</div>
+      <div class="small">Newest-first • 500 char limit • 15m cooldown</div>
     </section>
 
-    <section class="card">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <div style="display:flex;flex-direction:column;gap:6px;width:180px">
-          <input id="postAuthor" type="text" placeholder="Your name (username used for cooldown)" />
-          <div style="display:flex;gap:8px;align-items:center">
-            <div id="avatarPreview" class="avatar initials">—</div>
-            <div style="flex:1">
-              <input id="avatarUrl" type="text" placeholder="avatar URL (optional)" />
-              <div class="avatar-controls">
-                <label class="ghost" style="cursor:pointer;padding:6px 10px;border-radius:8px">
-                  Upload<input id="avatarFile" type="file" accept="image/*" style="display:none">
-                </label>
-                <button id="saveAvatar" class="ghost">Save</button>
-                <button id="clearAvatar" class="ghost">Clear</button>
-              </div>
-            </div>
+    <section class="card" style="margin-top:12px">
+      <div class="composer-meta">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div id="composerAvatar" class="avatar initials">—</div>
+          <div style="display:flex;flex-direction:column">
+            <div id="displayName" style="font-weight:800">guest</div>
+            <div class="small" id="loginHint">not signed in</div>
           </div>
         </div>
 
-        <div style="flex:1"></div>
-        <div class="small" id="charCount">500</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+          <button id="loginShowBtn" class="ghost">Login</button>
+          <button id="logoutBtn" class="ghost" style="display:none">Logout</button>
+        </div>
       </div>
 
-      <textarea id="postContent" maxlength="500" placeholder="Write something (markdown supported)"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button id="postBtn" class="btn">Post</button>
+      <textarea id="postContent" maxlength="500" placeholder="Write something gentle... (Markdown works)"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <button id="postBtn" class="btn">Post ✨</button>
         <button id="previewToggle" class="ghost">Preview</button>
+        <div class="char-count" id="charCount">500</div>
       </div>
       <div id="preview" class="preview-card" style="display:none"></div>
+      <div class="muted-note">You must be logged in to post. Accounts persist in Supabase.</div>
     </section>
 
     <div id="posts"></div>
   </main>
 
-  <!-- right: presets -->
   <aside class="right">
-    <section class="card">
+    <section id="authCard" class="card">
+      <div style="font-weight:800;margin-bottom:8px">Account</div>
+      <input id="u_name" placeholder="username" />
+      <div style="height:8px"></div>
+      <input id="u_pass" type="password" placeholder="password" />
+      <div style="height:10px"></div>
+      <div style="display:flex;gap:8px">
+        <button id="authBtn" class="btn">Login</button>
+        <button id="toggleAuth" class="ghost">Sign up</button>
+      </div>
+      <div style="height:10px"></div>
+
+      <div style="font-weight:700;margin-top:6px">Avatar (saved locally)</div>
+      <input id="avatarUrl" placeholder="paste image URL" />
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <label class="ghost" style="cursor:pointer;padding:8px;border-radius:8px">Upload<input id="avatarFile" type="file" accept="image/*" style="display:none"></label>
+        <button id="saveAvatar" class="btn">Save</button>
+        <button id="clearAvatar" class="ghost">Clear</button>
+      </div>
+      <div style="height:10px"></div>
+      <div class="small">Avatars are stored in your browser and attached to your username for display.</div>
+    </section>
+
+    <section class="card" style="margin-top:12px">
       <div style="font-weight:800;margin-bottom:8px">Presets</div>
       <div style="display:flex;gap:8px">
         <button class="ghost presetBtn" data-theme="dark-cozy">Dark</button>
@@ -100,8 +150,6 @@
         <button class="ghost presetBtn" data-theme="playful">Playful</button>
         <button class="ghost presetBtn" data-theme="light-simple">Light</button>
       </div>
-      <div style="height:12px"></div>
-      <div class="small">Avatars are stored locally. Upload or paste a URL, then Save.</div>
     </section>
   </aside>
 </div>
@@ -112,9 +160,9 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
-/* THEMES (presets only) */
+/* presets */
 const presets = {
-  "dark-cozy": {"--bg":"#0b0f12","--panel":"#0f1417","--muted":"#9fb4c8","--accent":"#7ee7c7","--accent2":"#ff9ad0","--ink":"#e6eef3"},
+  "dark-cozy": {"--bg":"#0b0f12","--panel":"#0f1417","--muted":"#98b4c6","--accent":"#7ee7c7","--accent2":"#ff9ad0","--ink":"#e6eef3"},
   "cozy-warm": {"--bg":"#f3efe8","--panel":"#fff6ee","--muted":"#8b7b74","--accent":"#d6a77a","--accent2":"#eabf9f","--ink":"#2f2a28"},
   "playful": {"--bg":"#0f1020","--panel":"#131223","--muted":"#c6d8ff","--accent":"#ffb86b","--accent2":"#ff6bcb","--ink":"#f0f6ff"},
   "light-simple": {"--bg":"#f7f7f7","--panel":"#ffffff","--muted":"#6b6b6b","--accent":"#6c9c7a","--accent2":"#9ec8c1","--ink":"#222"}
@@ -124,118 +172,177 @@ const LS_POSTS = 'blogjs_posts_v1';
 const LS_LAST = 'blogjs_lastposts_v1';
 const LS_AVATARS = 'blogjs_avatars_v1';
 
+/* ui refs */
 const themeSelect = document.getElementById('themeSelect');
-function populateThemes(){
-  themeSelect.innerHTML = '';
-  Object.keys(presets).forEach(k=>{
-    const o = document.createElement('option'); o.value = k; o.textContent = k;
-    themeSelect.appendChild(o);
-  });
-}
-function applyTheme(name){
-  const t = presets[name]; if(!t) return;
-  for(const k in t) document.documentElement.style.setProperty(k, t[k]);
-  localStorage.setItem(LS_ACTIVE, name);
-}
-populateThemes();
-const startTheme = localStorage.getItem(LS_ACTIVE) || Object.keys(presets)[0];
-themeSelect.value = startTheme; applyTheme(startTheme);
-themeSelect.addEventListener('change', ()=> applyTheme(themeSelect.value));
-document.querySelectorAll('.presetBtn').forEach(b=> b.addEventListener('click', ()=> { applyTheme(b.dataset.theme); themeSelect.value = b.dataset.theme; }));
-
-/* POSTS (local + server fallback) */
+const presetBtns = document.querySelectorAll('.presetBtn');
 const postBtn = document.getElementById('postBtn');
-const postAuthor = document.getElementById('postAuthor');
 const postContent = document.getElementById('postContent');
 const postsEl = document.getElementById('posts');
 const preview = document.getElementById('preview');
 const previewToggle = document.getElementById('previewToggle');
 const charCount = document.getElementById('charCount');
+const composerAvatar = document.getElementById('composerAvatar');
+const displayNameEl = document.getElementById('displayName');
+const loginHint = document.getElementById('loginHint');
 
-const CHAR_LIMIT = 500;
-const COOLDOWN_MS = 15*60*1000;
-const EXEMPT = 'fries';
+const authCard = document.getElementById('authCard');
+const u_name = document.getElementById('u_name');
+const u_pass = document.getElementById('u_pass');
+const authBtn = document.getElementById('authBtn');
+const toggleAuth = document.getElementById('toggleAuth');
+const loginShowBtn = document.getElementById('loginShowBtn');
+const logoutBtn = document.getElementById('logoutBtn');
 
-function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_POSTS) || '[]'); }catch(e){return[]} }
-function saveLocal(arr){ localStorage.setItem(LS_POSTS, JSON.stringify(arr)); }
-function loadLast(){ try{ return JSON.parse(localStorage.getItem(LS_LAST) || '{}'); }catch(e){return{}} }
-function saveLast(m){ localStorage.setItem(LS_LAST, JSON.stringify(m)); }
-function loadAvatars(){ try{ return JSON.parse(localStorage.getItem(LS_AVATARS) || '{}'); }catch(e){return{}} }
-function saveAvatars(m){ localStorage.setItem(LS_AVATARS, JSON.stringify(m)); }
-
-let LOCAL = loadLocal();
-function renderPosts(){
-  postsEl.innerHTML='';
-  for(const p of LOCAL){
-    const d=document.createElement('div'); d.className='post';
-    const avatarHtml = renderAvatar(p.author, p.avatar);
-    d.innerHTML = `<div style="flex:0 0 48px">${avatarHtml}</div>
-                   <div style="flex:1">
-                     <div class="meta"><div class="author">${escape(p.author)}</div><div class="time">${new Date(p.timestamp).toLocaleString()}</div></div>
-                     <div class="content">${DOMPurify.sanitize(marked.parse(p.content||''))}</div>
-                   </div>`;
-    postsEl.appendChild(d);
-  }
-}
-function escape(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
-
-function renderAvatar(username, avatarData){
-  // avatarData can be URL or dataURL. If provided, show <img>. Else show initials circle.
-  if (avatarData){
-    const url = avatarData;
-    return `<img class="avatar" src="${url}" alt="${escape(username)}'s avatar">`;
-  }
-  const initials = (username||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '?';
-  return `<div class="avatar initials">${escape(initials)}</div>`;
-}
-
-/* Avatar UI */
-const avatarPreview = document.getElementById('avatarPreview');
 const avatarUrl = document.getElementById('avatarUrl');
 const avatarFile = document.getElementById('avatarFile');
 const saveAvatar = document.getElementById('saveAvatar');
 const clearAvatar = document.getElementById('clearAvatar');
+const avatarPreview = document.getElementById('composerAvatar');
 
-function updateAvatarPreviewFor(name){
-  const map = loadAvatars();
-  const a = map[name] || null;
-  if (a){
-    avatarPreview.innerHTML = `<img src="${a}" class="avatar">`;
-  } else {
-    const initials = (name||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
-    avatarPreview.innerHTML = `<div class="avatar initials">${initials}</div>`;
+let signingUp = false;
+let currentUser = null;
+
+/* theme */
+function applyTheme(name){
+  const t = presets[name]; if(!t) return;
+  for(const k in t) document.documentElement.style.setProperty(k, t[k]);
+  localStorage.setItem(LS_ACTIVE, name);
+}
+function populateThemes(){
+  themeSelect.innerHTML = '';
+  Object.keys(presets).forEach(k=>{
+    const o=document.createElement('option'); o.value=k; o.textContent=k; themeSelect.appendChild(o);
+  });
+}
+populateThemes();
+const start = localStorage.getItem(LS_ACTIVE) || Object.keys(presets)[0];
+themeSelect.value = start; applyTheme(start);
+themeSelect.addEventListener('change', ()=> applyTheme(themeSelect.value));
+presetBtns.forEach(b=> b.addEventListener('click', ()=> { applyTheme(b.dataset.theme); themeSelect.value=b.dataset.theme; }));
+
+/* storage helpers */
+function loadLocalPosts(){ try{ return JSON.parse(localStorage.getItem(LS_POSTS)||'[]'); }catch(e){return[]} }
+function saveLocalPosts(a){ localStorage.setItem(LS_POSTS, JSON.stringify(a)); }
+function loadLast(){ try{ return JSON.parse(localStorage.getItem(LS_LAST)||'{}'); }catch(e){return{}} }
+function saveLast(m){ localStorage.setItem(LS_LAST, JSON.stringify(m)); }
+function loadAvatars(){ try{ return JSON.parse(localStorage.getItem(LS_AVATARS)||'{}'); }catch(e){return{}} }
+function saveAvatars(m){ localStorage.setItem(LS_AVATARS, JSON.stringify(m)); }
+
+/* posts state */
+let LOCAL = loadLocalPosts(); // newest-first
+function renderPosts(){
+  postsEl.innerHTML = '';
+  for(const p of LOCAL){
+    const wrapper = document.createElement('div'); wrapper.className='post';
+    const avatarHtml = buildAvatarHtml(p.author, p.avatar);
+    wrapper.innerHTML = `<div style="flex:0 0 56px">${avatarHtml}</div>
+      <div style="flex:1">
+        <div class="meta"><div class="author">${escape(p.author)}</div><div class="time">${new Date(p.timestamp).toLocaleString()}</div></div>
+        <div class="content">${DOMPurify.sanitize(marked.parse(p.content||''))}</div>
+      </div>`;
+    postsEl.appendChild(wrapper);
   }
 }
 
+/* avatar rendering */
+function buildAvatarHtml(username, avatarData){
+  const map = loadAvatars();
+  const a = avatarData || map[username] || null;
+  if (a){
+    return `<img class="avatar" src="${a}" alt="${escape(username)}'s avatar">`;
+  }
+  const initials = (username||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
+  return `<div class="avatar initials">${escape(initials)}</div>`;
+}
+
+/* auth - uses server endpoints /signup /login /logout /me */
+async function whoami(){
+  try{
+    const r = await fetch('/me');
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.user || null;
+  }catch(e){return null;}
+}
+async function refreshUI(){
+  currentUser = await whoami();
+  if (currentUser){
+    displayNameEl.textContent = currentUser;
+    loginHint.textContent = 'signed in';
+    authCard.style.display = ''; // keep auth card visible for avatar controls
+    loginShowBtn.style.display = 'none';
+    logoutBtn.style.display = '';
+    updateComposerAvatar(currentUser);
+  } else {
+    displayNameEl.textContent = 'guest';
+    loginHint.textContent = 'not signed in';
+    loginShowBtn.style.display = '';
+    logoutBtn.style.display = 'none';
+    updateComposerAvatar(null);
+  }
+}
+refreshUI();
+
+/* auth UI */
+loginShowBtn.addEventListener('click', ()=> { window.scrollTo({top:0,behavior:'smooth'}); });
+toggleAuth.addEventListener('click', ()=>{
+  signingUp = !signingUp;
+  authBtn.textContent = signingUp ? 'Sign up' : 'Login';
+  toggleAuth.textContent = signingUp ? 'Have an account?' : 'Sign up';
+});
+authBtn.addEventListener('click', async ()=>{
+  const u = u_name.value.trim(), p = u_pass.value.trim();
+  if (!u || !p) return alert('username + password required');
+  const ep = signingUp ? '/signup' : '/login';
+  try{
+    const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username:u, password:p }) });
+    const j = await res.json().catch(()=>({}));
+    if (!res.ok) return alert(j.error || 'auth failed');
+    u_name.value=''; u_pass.value='';
+    await refreshUI();
+    await mergeServerPosts();
+  }catch(e){ alert('auth error'); }
+});
+logoutBtn.addEventListener('click', async ()=>{ await fetch('/logout',{method:'POST'}).catch(()=>{}); await refreshUI(); });
+
+/* avatar controls */
+function updateComposerAvatar(name){
+  const map = loadAvatars();
+  const a = name ? map[name] : null;
+  if (a){
+    composerAvatar.innerHTML = `<img class="avatar" src="${a}">`;
+  } else {
+    const initials = (name||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
+    composerAvatar.innerHTML = `<div class="avatar initials">${escape(initials)}</div>`;
+  }
+}
 avatarFile.addEventListener('change', ()=> {
   const f = avatarFile.files[0];
   if (!f) return;
   const reader = new FileReader();
-  reader.onload = () => { avatarUrl.value = reader.result; avatarPreview.innerHTML = `<img class="avatar" src="${reader.result}">`; };
+  reader.onload = ()=> { avatarUrl.value = reader.result; updateComposerAvatar(postAuthorFromUser()); };
   reader.readAsDataURL(f);
 });
-
 saveAvatar.addEventListener('click', ()=> {
-  const name = (postAuthor.value || '').trim();
-  if (!name) return alert('enter a name to save avatar for');
+  const name = postAuthorFromUser();
+  if (!name) return alert('enter a username in the account box or sign in');
   const url = avatarUrl.value.trim();
-  if (!url) return alert('paste a URL or upload a file first');
+  if (!url) return alert('paste a URL or upload an image first');
   const map = loadAvatars(); map[name] = url; saveAvatars(map);
-  updateAvatarPreviewFor(name);
+  updateComposerAvatar(name);
   alert('avatar saved locally');
 });
 clearAvatar.addEventListener('click', ()=> {
-  const name = (postAuthor.value || '').trim();
-  if (!name) return alert('enter a name');
-  const map = loadAvatars(); delete map[name]; saveAvatars(map);
-  avatarUrl.value = ''; avatarFile.value = ''; updateAvatarPreviewFor(name);
+  const name = postAuthorFromUser();
+  if (!name) return alert('enter a username');
+  const map = loadAvatars(); delete map[name]; saveAvatars(map); avatarUrl.value=''; updateComposerAvatar(name);
 });
 
-postAuthor.addEventListener('input', ()=> updateAvatarPreviewFor(postAuthor.value.trim()));
+/* posting */
+function postAuthorFromUser(){ return currentUser || u_name.value.trim() || 'anon'; }
 
-/* Posting logic */
-postContent.addEventListener('input', ()=> charCount.textContent = CHAR_LIMIT - postContent.value.length);
-previewToggle.addEventListener('click', ()=>{
+postContent.addEventListener('input', ()=> charCount.textContent = 500 - postContent.value.length);
+previewToggle.addEventListener('click', ()=> {
   if (preview.style.display === 'none' || preview.style.display === '') {
     preview.innerHTML = DOMPurify.sanitize(marked.parse(postContent.value || ''));
     preview.style.display = 'block';
@@ -243,65 +350,90 @@ previewToggle.addEventListener('click', ()=>{
 });
 
 async function submitPost(){
-  const author = (postAuthor.value||'anon').trim();
+  const author = postAuthorFromUser();
+  if (!currentUser){
+    alert('log in to post');
+    return;
+  }
   const content = postContent.value.trim();
   if (!content) return alert('write something first');
-  if (content.length > CHAR_LIMIT) return alert('too long');
+  if (content.length > 500) return alert('too long');
 
-  // cooldown
-  if (author.toLowerCase() !== EXEMPT){
+  // cooldown check local-first
+  if (author.toLowerCase() !== 'fries'){
     const last = loadLast()[author] ? new Date(loadLast()[author]).getTime() : 0;
-    if (Date.now() - last < COOLDOWN_MS) return alert('cooldown active');
+    if (Date.now() - last < 15*60*1000) return alert('cooldown active');
   }
-
-  const avatars = loadAvatars();
-  const avatarForAuthor = avatars[author] || null;
 
   let postObj = null;
   try{
-    // attempt server post (server may ignore avatar)
-    const r = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content, author })});
+    const r = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content }) });
     if (r.ok){
       const j = await r.json();
       postObj = j.post || j;
-      // attach avatar locally for UI
-      postObj.avatar = avatarForAuthor;
+    } else {
+      const err = await r.json().catch(()=>({}));
+      if (err && err.error) return alert(err.error);
     }
-  }catch(e){}
+  }catch(e){ /* offline or server error - fallback */ }
+
+  const avatars = loadAvatars();
+  const avatarFor = avatars[author] || null;
 
   if (!postObj){
-    postObj = { id: Date.now().toString(36), author, content, timestamp: new Date().toISOString(), avatar: avatarForAuthor };
+    postObj = { id: Date.now().toString(36), author, content, timestamp: new Date().toISOString(), avatar: avatarFor };
+  } else {
+    postObj.avatar = avatarFor;
   }
 
-  LOCAL.unshift(postObj); saveLocal(LOCAL);
+  LOCAL.unshift(postObj);
+  saveLocalPosts(LOCAL);
   const lastMap = loadLast(); lastMap[author] = postObj.timestamp; saveLast(lastMap);
   renderPosts();
-  postContent.value=''; charCount.textContent = CHAR_LIMIT; preview.style.display='none';
-  try{ confetti({ particleCount: 40, spread: 60, origin:{ y:0.4 } }); }catch(e){}
+  postContent.value=''; charCount.textContent = 500; preview.style.display='none';
+  try{ confetti({ particleCount: 45, spread: 70, origin:{ y:0.35 } }); }catch(e){}
 }
 postBtn.addEventListener('click', submitPost);
 
-/* periodic server merge */
-setInterval(async ()=>{
+/* server merge & poll */
+async function mergeServerPosts(){
   try{
     const r = await fetch('/posts');
     if (!r.ok) return;
     const arr = await r.json();
     const ids = new Set(LOCAL.map(p=>p.id));
-    for (const p of arr) if (!ids.has(p.id)) {
-      // don't have avatar from server, try local avatar map
-      const map = loadAvatars();
-      p.avatar = map[p.author] || null;
-      LOCAL.unshift(p);
+    const avatars = loadAvatars();
+    for (const p of arr){
+      if (!ids.has(p.id)){
+        p.avatar = avatars[p.author] || null;
+        LOCAL.unshift(p);
+      }
     }
-    saveLocal(LOCAL); renderPosts();
+    saveLocalPosts(LOCAL); renderPosts();
   }catch(e){}
-},8000);
+}
 
-/* initial load */
-LOCAL = loadLocal();
+setInterval(()=> mergeServerPosts(), 7000);
+
+/* storage functions re-used */
+function loadLocalPosts(){ try{ return JSON.parse(localStorage.getItem(LS_POSTS)||'[]'); }catch(e){return[]} }
+function saveLocalPosts(a){ localStorage.setItem(LS_POSTS, JSON.stringify(a)); }
+function loadLast(){ try{ return JSON.parse(localStorage.getItem(LS_LAST)||'{}'); }catch(e){return{}} }
+function saveLast(m){ localStorage.setItem(LS_LAST, JSON.stringify(m)); }
+function loadAvatars(){ try{ return JSON.parse(localStorage.getItem(LS_AVATARS)||'{}'); }catch(e){return{} } }
+function saveAvatars(m){ localStorage.setItem(LS_AVATARS, JSON.stringify(m)); }
+
+/* small helpers */
+function escape(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+/* initial state */
+let LOCAL = loadLocalPosts();
 renderPosts();
-updateAvatarPreviewFor(postAuthor.value.trim());
+updateComposerAvatar(null);
+
+// ensure UI reflects /me
+refreshUI();
+setInterval(refreshUI, 30_000); // revalidate cookie occasionally
 
 </script>
 </body>
