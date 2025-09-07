@@ -1,15 +1,18 @@
 {
-  "name": "mini-blog",
+  "name": "blog.js",
   "version": "1.0.0",
-  "description": "Minimal blog with login, markdown, and image uploads",
-  "main": "server.js",
+  "description": "Cozy Calm Social — Supabase-backed blog with markdown",
+  "main": "blog.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node blog.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cookie-parser": "^1.4.6",
-    "multer": "1.4.5-lts.1",
+    "@supabase/supabase-js": "^2.45.2",
     "marked": "^9.1.6"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
