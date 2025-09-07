@@ -1,440 +1,244 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>blog.js</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" />
-<style>
-  :root{
-    --bg:#081017; --panel:#0f1417; --muted:#98b4c6;
-    --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
-    --glass: rgba(255,255,255,0.03);
-    --card-shadow: 0 12px 40px rgba(2,6,10,0.6);
-    --soft-radius:14px;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blog.js</title>
 
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:
-    radial-gradient(900px 400px at 10% 10%, rgba(126,231,199,0.03), transparent 6%),
-    radial-gradient(700px 300px at 90% 90%, rgba(255,154,208,0.02), transparent 6%),
-    var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-
-  .wrap{max-width:1080px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
-  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  h1{margin:0;font-size:20px;color:var(--accent);letter-spacing:.2px}
-  .sub{color:var(--muted);font-size:13px}
-
-  .card{background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.01));padding:14px;border-radius:var(--soft-radius);box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.03);transition:transform .18s ease,box-shadow .18s ease}
-  .card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(2,6,10,0.7)}
-
-  input[type=text], input[type=password], textarea, select {
-    width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:var(--ink);outline:none;transition:box-shadow .12s, transform .08s;
-  }
-  input:focus, textarea:focus { box-shadow:0 6px 20px rgba(0,0,0,0.4); transform:translateY(-1px); }
-
-  textarea{min-height:96px;resize:vertical}
-  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061014;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;transition:transform .12s}
-  .btn:active{transform:translateY(1px)}
-  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:10px;cursor:pointer}
-
-  .row{display:flex;gap:8px;align-items:center}
-  .small{font-size:13px;color:var(--muted)}
-
-  /* posts */
-  #posts{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-  .post{display:flex;gap:12px;padding:14px;border-radius:12px;background:
-    linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.02);
-    align-items:flex-start;opacity:0;transform:translateY(10px) scale(.995);animation:pop .38s forwards}
-  @keyframes pop{to{opacity:1;transform:none}}
-  .meta{display:flex;flex-direction:column;gap:6px}
-  .author{color:var(--accent);font-weight:800}
-  .time{color:var(--muted);font-size:12px}
-  .content{line-height:1.53;color:var(--ink);max-width:880px;word-break:break-word}
-
-  /* avatar */
-  .avatar{width:56px;height:56px;border-radius:12px;flex:0 0 56px;object-fit:cover;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#061014;font-weight:800}
-  .avatar.initials{font-size:14px}
-
-  /* composer small */
-  .composer-meta{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .char-count{margin-left:auto;color:var(--muted);font-size:13px}
-
-  /* preview */
-  .preview-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;margin-top:10px}
-
-  /* subtle hover for posts */
-  .post:hover{transform:translateY(-6px);box-shadow:0 18px 50px rgba(0,0,0,0.45)}
-  .muted-note{color:var(--muted);font-size:13px;margin-top:8px}
-
-  @media (max-width:960px){ .wrap{grid-template-columns:1fr;padding:12px} .right{order:2} }
-</style>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <style>
+    :root{
+      --bg:#0b0f12; --panel:#13181c; --muted:#7a8a99;
+      --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
+      --soft-shadow: 0 10px 30px rgba(47,42,40,0.08);
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#efe7de);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
+    .wrap{max-width:880px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:18px}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;font-size:20px}
+    .sub{color:var(--muted);font-size:13px}
+    .card{background:var(--panel);border-radius:12px;padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(0,0,0,0.03)}
+    /* posts */
+    #posts{display:flex;flex-direction:column;gap:12px}
+    .post{padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff6f2);border:1px solid rgba(0,0,0,0.02);animation:lift .28s ease;overflow:hidden}
+    @keyframes lift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
+    .author{font-weight:700;color:var(--accent2)}
+    .content{color:var(--ink);line-height:1.5}
+    /* auth / composer */
+    input, textarea, button{font-family:inherit}
+    input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:#fff}
+    textarea{min-height:92px;resize:vertical}
+    .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#2b1f17;font-weight:700;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+    .ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:10px;cursor:pointer}
+    .cozy {font-size:13px;color:var(--muted)}
+    .charcount{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
+    @media (max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}}
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>blog.js</h1>
-      <div class="sub">calm posts • presets themes • avatars • markdown</div>
-    </div>
-
-    <div class="card" style="display:flex;gap:12px;align-items:center;min-width:220px;justify-content:flex-end">
-      <div class="small">Theme</div>
-      <select id="themeSelect" style="width:160px"></select>
-    </div>
-  </header>
-
-  <main>
-    <section class="card" style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-weight:800">Feed</div>
-      <div class="small">Newest-first • 500 char limit • 15m cooldown</div>
-    </section>
-
-    <section class="card" style="margin-top:12px">
-      <div class="composer-meta">
-        <div style="display:flex;gap:10px;align-items:center">
-          <div id="composerAvatar" class="avatar initials">—</div>
-          <div style="display:flex;flex-direction:column">
-            <div id="displayName" style="font-weight:800">guest</div>
-            <div class="small" id="loginHint">not signed in</div>
-          </div>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Blog.js</h1>
+        <div class="sub">cozy. slow. markdown-friendly.</div>
+      </div>
+      <div class="card" style="display:flex;gap:10px;align-items:center">
+        <div style="min-width:160px">
+          <div id="meName" style="font-weight:800;color:var(--accent)"></div>
+          <div id="meSub" class="cozy">not signed in</div>
         </div>
-
-        <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
-          <button id="loginShowBtn" class="ghost">Login</button>
+        <div style="margin-left:auto">
           <button id="logoutBtn" class="ghost" style="display:none">Logout</button>
         </div>
       </div>
+    </header>
 
-      <textarea id="postContent" maxlength="500" placeholder="Write something gentle... (Markdown works)"></textarea>
-      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-        <button id="postBtn" class="btn">Post ✨</button>
-        <button id="previewToggle" class="ghost">Preview</button>
-        <div class="char-count" id="charCount">500</div>
-      </div>
-      <div id="preview" class="preview-card" style="display:none"></div>
-      <div class="muted-note">You must be logged in to post. Accounts persist in Supabase.</div>
-    </section>
+    <!-- feed column -->
+    <main>
+      <section class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Feed</div>
+        <div class="muted">Newest at top • 500 char limit • 15m cooldown</div>
+      </section>
 
-    <div id="posts"></div>
-  </main>
+      <div id="posts"></div>
+    </main>
 
-  <aside class="right">
-    <section id="authCard" class="card">
-      <div style="font-weight:800;margin-bottom:8px">Account</div>
-      <input id="u_name" placeholder="username" />
-      <div style="height:8px"></div>
-      <input id="u_pass" type="password" placeholder="password" />
-      <div style="height:10px"></div>
-      <div style="display:flex;gap:8px">
-        <button id="authBtn" class="btn">Login</button>
-        <button id="toggleAuth" class="ghost">Sign up</button>
-      </div>
-      <div style="height:10px"></div>
+    <!-- right column -->
+    <aside>
+      <section id="authCard" class="card">
+        <div style="font-weight:700;margin-bottom:8px">Account</div>
+        <input id="u_name" placeholder="username" />
+        <div style="height:8px"></div>
+        <input id="u_pass" type="password" placeholder="password" />
+        <div style="height:10px"></div>
+        <div style="display:flex;gap:8px">
+          <button id="authBtn" class="btn">Login</button>
+          <button id="toggleAuth" class="ghost">Sign up</button>
+        </div>
+        <div style="height:10px"></div>
+        <div class="cozy">view only if not signed in</div>
+      </section>
 
-      <div style="font-weight:700;margin-top:6px">Avatar (saved locally)</div>
-      <input id="avatarUrl" placeholder="paste image URL" />
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <label class="ghost" style="cursor:pointer;padding:8px;border-radius:8px">Upload<input id="avatarFile" type="file" accept="image/*" style="display:none"></label>
-        <button id="saveAvatar" class="btn">Save</button>
-        <button id="clearAvatar" class="ghost">Clear</button>
-      </div>
-      <div style="height:10px"></div>
-      <div class="small">Avatars are stored in your browser and attached to your username for display.</div>
-    </section>
+      <section id="composer" class="card" style="margin-top:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-weight:700" id="displayName">guest</div>
+          <div id="composerClock" class="cozy" style="margin-left:auto"></div>
+        </div>
+        <textarea id="content" maxlength="500" placeholder="Write something gentle and short..."></textarea>
+        <div class="charcount"><span id="charsLeft">500</span> chars left</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="postBtn" class="btn">Post • ✨</button>
+          <button id="previewBtn" class="ghost">Preview</button>
+        </div>
+        <div id="preview" class="card" style="margin-top:10px;display:none"></div>
+      </section>
+    </aside>
+  </div>
 
-    <section class="card" style="margin-top:12px">
-      <div style="font-weight:800;margin-bottom:8px">Presets</div>
-      <div style="display:flex;gap:8px">
-        <button class="ghost presetBtn" data-theme="dark-cozy">Dark</button>
-        <button class="ghost presetBtn" data-theme="cozy-warm">Cozy</button>
-        <button class="ghost presetBtn" data-theme="playful">Playful</button>
-        <button class="ghost presetBtn" data-theme="light-simple">Light</button>
-      </div>
-    </section>
-  </aside>
-</div>
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<!-- libs -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const CHAR_LIMIT = 500;
+    const EXEMPT = 'fries';
+    let currentUser = null;
+    let shown = new Set();
 
-<script>
-/* presets */
-const presets = {
-  "dark-cozy": {"--bg":"#0b0f12","--panel":"#0f1417","--muted":"#98b4c6","--accent":"#7ee7c7","--accent2":"#ff9ad0","--ink":"#e6eef3"},
-  "cozy-warm": {"--bg":"#f3efe8","--panel":"#fff6ee","--muted":"#8b7b74","--accent":"#d6a77a","--accent2":"#eabf9f","--ink":"#2f2a28"},
-  "playful": {"--bg":"#0f1020","--panel":"#131223","--muted":"#c6d8ff","--accent":"#ffb86b","--accent2":"#ff6bcb","--ink":"#f0f6ff"},
-  "light-simple": {"--bg":"#f7f7f7","--panel":"#ffffff","--muted":"#6b6b6b","--accent":"#6c9c7a","--accent2":"#9ec8c1","--ink":"#222"}
-};
-const LS_ACTIVE = 'blogjs_active_theme_v1';
-const LS_POSTS = 'blogjs_posts_v1';
-const LS_LAST = 'blogjs_lastposts_v1';
-const LS_AVATARS = 'blogjs_avatars_v1';
-
-/* ui refs */
-const themeSelect = document.getElementById('themeSelect');
-const presetBtns = document.querySelectorAll('.presetBtn');
-const postBtn = document.getElementById('postBtn');
-const postContent = document.getElementById('postContent');
-const postsEl = document.getElementById('posts');
-const preview = document.getElementById('preview');
-const previewToggle = document.getElementById('previewToggle');
-const charCount = document.getElementById('charCount');
-const composerAvatar = document.getElementById('composerAvatar');
-const displayNameEl = document.getElementById('displayName');
-const loginHint = document.getElementById('loginHint');
-
-const authCard = document.getElementById('authCard');
-const u_name = document.getElementById('u_name');
-const u_pass = document.getElementById('u_pass');
-const authBtn = document.getElementById('authBtn');
-const toggleAuth = document.getElementById('toggleAuth');
-const loginShowBtn = document.getElementById('loginShowBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-
-const avatarUrl = document.getElementById('avatarUrl');
-const avatarFile = document.getElementById('avatarFile');
-const saveAvatar = document.getElementById('saveAvatar');
-const clearAvatar = document.getElementById('clearAvatar');
-const avatarPreview = document.getElementById('composerAvatar');
-
-let signingUp = false;
-let currentUser = null;
-
-/* theme */
-function applyTheme(name){
-  const t = presets[name]; if(!t) return;
-  for(const k in t) document.documentElement.style.setProperty(k, t[k]);
-  localStorage.setItem(LS_ACTIVE, name);
-}
-function populateThemes(){
-  themeSelect.innerHTML = '';
-  Object.keys(presets).forEach(k=>{
-    const o=document.createElement('option'); o.value=k; o.textContent=k; themeSelect.appendChild(o);
-  });
-}
-populateThemes();
-const start = localStorage.getItem(LS_ACTIVE) || Object.keys(presets)[0];
-themeSelect.value = start; applyTheme(start);
-themeSelect.addEventListener('change', ()=> applyTheme(themeSelect.value));
-presetBtns.forEach(b=> b.addEventListener('click', ()=> { applyTheme(b.dataset.theme); themeSelect.value=b.dataset.theme; }));
-
-/* storage helpers */
-function loadLocalPosts(){ try{ return JSON.parse(localStorage.getItem(LS_POSTS)||'[]'); }catch(e){return[]} }
-function saveLocalPosts(a){ localStorage.setItem(LS_POSTS, JSON.stringify(a)); }
-function loadLast(){ try{ return JSON.parse(localStorage.getItem(LS_LAST)||'{}'); }catch(e){return{}} }
-function saveLast(m){ localStorage.setItem(LS_LAST, JSON.stringify(m)); }
-function loadAvatars(){ try{ return JSON.parse(localStorage.getItem(LS_AVATARS)||'{}'); }catch(e){return{}} }
-function saveAvatars(m){ localStorage.setItem(LS_AVATARS, JSON.stringify(m)); }
-
-/* posts state */
-let LOCAL = loadLocalPosts(); // newest-first
-function renderPosts(){
-  postsEl.innerHTML = '';
-  for(const p of LOCAL){
-    const wrapper = document.createElement('div'); wrapper.className='post';
-    const avatarHtml = buildAvatarHtml(p.author, p.avatar);
-    wrapper.innerHTML = `<div style="flex:0 0 56px">${avatarHtml}</div>
-      <div style="flex:1">
-        <div class="meta"><div class="author">${escape(p.author)}</div><div class="time">${new Date(p.timestamp).toLocaleString()}</div></div>
-        <div class="content">${DOMPurify.sanitize(marked.parse(p.content||''))}</div>
-      </div>`;
-    postsEl.appendChild(wrapper);
-  }
-}
-
-/* avatar rendering */
-function buildAvatarHtml(username, avatarData){
-  const map = loadAvatars();
-  const a = avatarData || map[username] || null;
-  if (a){
-    return `<img class="avatar" src="${a}" alt="${escape(username)}'s avatar">`;
-  }
-  const initials = (username||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
-  return `<div class="avatar initials">${escape(initials)}</div>`;
-}
-
-/* auth - uses server endpoints /signup /login /logout /me */
-async function whoami(){
-  try{
-    const r = await fetch('/me');
-    if (!r.ok) return null;
-    const j = await r.json();
-    return j.user || null;
-  }catch(e){return null;}
-}
-async function refreshUI(){
-  currentUser = await whoami();
-  if (currentUser){
-    displayNameEl.textContent = currentUser;
-    loginHint.textContent = 'signed in';
-    authCard.style.display = ''; // keep auth card visible for avatar controls
-    loginShowBtn.style.display = 'none';
-    logoutBtn.style.display = '';
-    updateComposerAvatar(currentUser);
-  } else {
-    displayNameEl.textContent = 'guest';
-    loginHint.textContent = 'not signed in';
-    loginShowBtn.style.display = '';
-    logoutBtn.style.display = 'none';
-    updateComposerAvatar(null);
-  }
-}
-refreshUI();
-
-/* auth UI */
-loginShowBtn.addEventListener('click', ()=> { window.scrollTo({top:0,behavior:'smooth'}); });
-toggleAuth.addEventListener('click', ()=>{
-  signingUp = !signingUp;
-  authBtn.textContent = signingUp ? 'Sign up' : 'Login';
-  toggleAuth.textContent = signingUp ? 'Have an account?' : 'Sign up';
-});
-authBtn.addEventListener('click', async ()=>{
-  const u = u_name.value.trim(), p = u_pass.value.trim();
-  if (!u || !p) return alert('username + password required');
-  const ep = signingUp ? '/signup' : '/login';
-  try{
-    const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username:u, password:p }) });
-    const j = await res.json().catch(()=>({}));
-    if (!res.ok) return alert(j.error || 'auth failed');
-    u_name.value=''; u_pass.value='';
-    await refreshUI();
-    await mergeServerPosts();
-  }catch(e){ alert('auth error'); }
-});
-logoutBtn.addEventListener('click', async ()=>{ await fetch('/logout',{method:'POST'}).catch(()=>{}); await refreshUI(); });
-
-/* avatar controls */
-function updateComposerAvatar(name){
-  const map = loadAvatars();
-  const a = name ? map[name] : null;
-  if (a){
-    composerAvatar.innerHTML = `<img class="avatar" src="${a}">`;
-  } else {
-    const initials = (name||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
-    composerAvatar.innerHTML = `<div class="avatar initials">${escape(initials)}</div>`;
-  }
-}
-avatarFile.addEventListener('change', ()=> {
-  const f = avatarFile.files[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = ()=> { avatarUrl.value = reader.result; updateComposerAvatar(postAuthorFromUser()); };
-  reader.readAsDataURL(f);
-});
-saveAvatar.addEventListener('click', ()=> {
-  const name = postAuthorFromUser();
-  if (!name) return alert('enter a username in the account box or sign in');
-  const url = avatarUrl.value.trim();
-  if (!url) return alert('paste a URL or upload an image first');
-  const map = loadAvatars(); map[name] = url; saveAvatars(map);
-  updateComposerAvatar(name);
-  alert('avatar saved locally');
-});
-clearAvatar.addEventListener('click', ()=> {
-  const name = postAuthorFromUser();
-  if (!name) return alert('enter a username');
-  const map = loadAvatars(); delete map[name]; saveAvatars(map); avatarUrl.value=''; updateComposerAvatar(name);
-});
-
-/* posting */
-function postAuthorFromUser(){ return currentUser || u_name.value.trim() || 'anon'; }
-
-postContent.addEventListener('input', ()=> charCount.textContent = 500 - postContent.value.length);
-previewToggle.addEventListener('click', ()=> {
-  if (preview.style.display === 'none' || preview.style.display === '') {
-    preview.innerHTML = DOMPurify.sanitize(marked.parse(postContent.value || ''));
-    preview.style.display = 'block';
-  } else preview.style.display = 'none';
-});
-
-async function submitPost(){
-  const author = postAuthorFromUser();
-  if (!currentUser){
-    alert('log in to post');
-    return;
-  }
-  const content = postContent.value.trim();
-  if (!content) return alert('write something first');
-  if (content.length > 500) return alert('too long');
-
-  // cooldown check local-first
-  if (author.toLowerCase() !== 'fries'){
-    const last = loadLast()[author] ? new Date(loadLast()[author]).getTime() : 0;
-    if (Date.now() - last < 15*60*1000) return alert('cooldown active');
-  }
-
-  let postObj = null;
-  try{
-    const r = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content }) });
-    if (r.ok){
-      const j = await r.json();
-      postObj = j.post || j;
-    } else {
-      const err = await r.json().catch(()=>({}));
-      if (err && err.error) return alert(err.error);
+    function renderMd(md){
+      try { return DOMPurify.sanitize(marked.parse(md||'')); }
+      catch(e){ return DOMPurify.sanitize(md||''); }
     }
-  }catch(e){ /* offline or server error - fallback */ }
 
-  const avatars = loadAvatars();
-  const avatarFor = avatars[author] || null;
+    function makePostEl(p){
+      const el = document.createElement('div');
+      el.className = 'post';
+      el.innerHTML = `
+        <div class="meta">
+          <div class="author">${escapeHtml(p.author)}</div>
+          <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
+        </div>
+        <div class="content">${renderMd(p.content||'')}</div>
+      `;
+      return el;
+    }
 
-  if (!postObj){
-    postObj = { id: Date.now().toString(36), author, content, timestamp: new Date().toISOString(), avatar: avatarFor };
-  } else {
-    postObj.avatar = avatarFor;
-  }
+    function prependPost(p){
+      if (!p || !p.id) return;
+      if (shown.has(p.id)) return;
+      const node = makePostEl(p);
+      $('posts').insertBefore(node, $('posts').firstChild);
+      shown.add(p.id);
+    }
 
-  LOCAL.unshift(postObj);
-  saveLocalPosts(LOCAL);
-  const lastMap = loadLast(); lastMap[author] = postObj.timestamp; saveLast(lastMap);
-  renderPosts();
-  postContent.value=''; charCount.textContent = 500; preview.style.display='none';
-  try{ confetti({ particleCount: 45, spread: 70, origin:{ y:0.35 } }); }catch(e){}
-}
-postBtn.addEventListener('click', submitPost);
+    async function loadPosts(){
+      const res = await fetch('/posts');
+      const arr = await res.json();
+      $('posts').innerHTML = '';
+      shown.clear();
+      for (const p of arr) prependPost(p);
+    }
 
-/* server merge & poll */
-async function mergeServerPosts(){
-  try{
-    const r = await fetch('/posts');
-    if (!r.ok) return;
-    const arr = await r.json();
-    const ids = new Set(LOCAL.map(p=>p.id));
-    const avatars = loadAvatars();
-    for (const p of arr){
-      if (!ids.has(p.id)){
-        p.avatar = avatars[p.author] || null;
-        LOCAL.unshift(p);
+    async function whoami(){
+      try{
+        const r = await fetch('/me');
+        if (!r.ok) return { user: null };
+        return await r.json();
+      } catch { return { user: null }; }
+    }
+
+    async function refreshUI(){
+      const m = await whoami();
+      currentUser = m.user || null;
+      if (currentUser){
+        $('meName').textContent = currentUser;
+        $('meSub').textContent = 'signed in';
+        $('logoutBtn').style.display = 'inline-block';
+        $('displayName').textContent = currentUser;
+        $('authCard').style.display = 'none';
+      } else {
+        $('meName').textContent = '';
+        $('meSub').textContent = 'not signed in';
+        $('logoutBtn').style.display = 'none';
+        $('displayName').textContent = 'guest';
+        $('authCard').style.display = '';
       }
     }
-    saveLocalPosts(LOCAL); renderPosts();
-  }catch(e){}
-}
 
-setInterval(()=> mergeServerPosts(), 7000);
+    // auth flows
+    let signingUp = false;
+    $('toggleAuth').addEventListener('click', ()=> {
+      signingUp = !signingUp;
+      $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
+      $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
+    });
 
-/* storage functions re-used */
-function loadLocalPosts(){ try{ return JSON.parse(localStorage.getItem(LS_POSTS)||'[]'); }catch(e){return[]} }
-function saveLocalPosts(a){ localStorage.setItem(LS_POSTS, JSON.stringify(a)); }
-function loadLast(){ try{ return JSON.parse(localStorage.getItem(LS_LAST)||'{}'); }catch(e){return{}} }
-function saveLast(m){ localStorage.setItem(LS_LAST, JSON.stringify(m)); }
-function loadAvatars(){ try{ return JSON.parse(localStorage.getItem(LS_AVATARS)||'{}'); }catch(e){return{} } }
-function saveAvatars(m){ localStorage.setItem(LS_AVATARS, JSON.stringify(m)); }
+    $('authBtn').addEventListener('click', async ()=>{
+      const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
+      if (!u || !p) return alert('username + password required');
+      const ep = signingUp ? '/signup' : '/login';
+      const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p })});
+      const j = await res.json().catch(()=>({}));
+      if (!res.ok) return alert(j.error || 'auth failed');
+      $('u_name').value=''; $('u_pass').value='';
+      await refreshUI();
+      await loadPosts();
+    });
 
-/* small helpers */
-function escape(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+    $('logoutBtn').addEventListener('click', async ()=>{
+      await fetch('/logout',{ method:'POST' }).catch(()=>{});
+      currentUser = null; shown.clear();
+      await refreshUI();
+      await loadPosts();
+    });
 
-/* initial state */
-let LOCAL = loadLocalPosts();
-renderPosts();
-updateComposerAvatar(null);
+    // composer
+    $('content').addEventListener('input', ()=> {
+      const left = CHAR_LIMIT - $('content').value.length;
+      $('charsLeft').textContent = left;
+    });
 
-// ensure UI reflects /me
-refreshUI();
-setInterval(refreshUI, 30_000); // revalidate cookie occasionally
+    $('previewBtn').addEventListener('click', ()=> {
+      const raw = $('content').value || '';
+      $('preview').innerHTML = renderMd(raw);
+      $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
+    });
 
-</script>
+    $('postBtn').addEventListener('click', async ()=>{
+      const content = $('content').value.trim();
+      if (!content) return alert('write something first');
+      if (content.length > CHAR_LIMIT) return alert(`max ${CHAR_LIMIT} chars`);
+      if (!currentUser) return alert('log in to post');
+
+      const res = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content })});
+      const j = await res.json().catch(()=>({}));
+      if (!res.ok) return alert(j.error || 'post failed');
+      const newPost = j.post || j;
+      confetti({ particleCount: 45, spread: 70, origin: { y: 0.35 }});
+      prependPost(newPost);
+      $('content').value = ''; $('charsLeft').textContent = CHAR_LIMIT; $('preview').style.display='none';
+    });
+
+    // helpers
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+    // init
+    (async function init(){
+      await refreshUI();
+      await loadPosts();
+      setInterval(async ()=>{
+        try{
+          const res = await fetch('/posts');
+          const arr = await res.json();
+          for (const p of arr) if (!shown.has(p.id)) prependPost(p);
+        }catch(e){}
+      },7000);
+      setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
+    })();
+  </script>
 </body>
 </html>
