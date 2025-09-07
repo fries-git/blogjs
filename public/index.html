@@ -1,45 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>blog.js</title>
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <style>
   :root{
-    --bg: #0b0f12;
-    --panel: #0f1417;
-    --muted: #9fb4c8;
-    --accent: #7ee7c7;
-    --accent2: #ff9ad0;
-    --ink: #e6eef3;
-    --card-shadow: 0 10px 30px rgba(2,6,10,0.6);
+    --bg:#0b0f12; --panel:#0f1417; --muted:#9fb4c8;
+    --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
   }
-
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1100px;margin:28px auto;padding:18px;display:grid;grid-template-columns:1fr 360px;gap:18px}
-  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  h1{margin:0;font-size:20px;color:var(--accent)}
+  .wrap{max-width:1100px;margin:28px auto;padding:18px;display:grid;grid-template-columns:1fr 320px;gap:18px}
+  header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+  h1{margin:0;color:var(--accent)}
   .sub{color:var(--muted);font-size:13px}
-  .card{background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.02));padding:14px;border-radius:12px;box-shadow:var(--card-shadow);border:1px solid rgba(255,255,255,0.03)}
-  .row{display:flex;gap:8px;align-items:center}
-  .muted{color:var(--muted);font-size:13px}
+  .card{background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.02));padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,10,0.6)}
   input[type=text], textarea, select {width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--ink);outline:none}
   textarea{min-height:88px;resize:vertical}
-  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061014;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#061014;padding:8px 12px;border-radius:10px;cursor:pointer}
   .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:8px;cursor:pointer}
-  #posts{display:flex;flex-direction:column;gap:12px}
-  .post{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.02)}
-  .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
-  .author{font-weight:700;color:var(--accent)}
-  .content{line-height:1.45;color:var(--ink)}
-  .theme-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #posts{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+  .post{display:flex;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.02);align-items:flex-start}
+  .meta{display:flex;flex-direction:column;gap:6px}
+  .author{color:var(--accent);font-weight:700}
+  .time{color:var(--muted);font-size:12px}
+  .content{line-height:1.45;color:var(--ink);max-width:880px;word-wrap:break-word}
+  .avatar{width:48px;height:48px;border-radius:10px;flex:0 0 48px;object-fit:cover;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#061014;font-weight:700}
+  .avatar.initials{font-size:14px}
   .small{font-size:13px;color:var(--muted)}
-  @media (max-width:960px){ .wrap{grid-template-columns:1fr;padding:12px} .right{order:2} }
-  /* small comfy touches */
-  .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
-  .preview-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
+  .preview-card{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;margin-top:8px}
+  .avatar-controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+  @media (max-width:920px){.wrap{grid-template-columns:1fr;padding:12px}.right{order:2}}
 </style>
 </head>
 <body>
@@ -47,67 +40,68 @@
   <header>
     <div>
       <h1>blog.js</h1>
-      <div class="sub">custom themes • saved locally • markdown-ready</div>
+      <div class="sub">presets themes • avatars • markdown-ready</div>
     </div>
 
-    <div class="card" style="display:flex;gap:10px;align-items:center;min-width:240px;justify-content:flex-end">
+    <div class="card" style="display:flex;gap:10px;align-items:center">
       <div class="small">Theme</div>
       <select id="themeSelect" style="width:160px"></select>
-      <button id="editThemeBtn" class="ghost">Edit</button>
     </div>
   </header>
 
-  <!-- main feed -->
+  <!-- main feed & composer -->
   <main>
     <section class="card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
       <div style="font-weight:800">Feed</div>
-      <div class="muted">Newest-first • 500 char limit • 15m cooldown</div>
+      <div class="small">Newest-first • 500 chars • 15m cooldown (fries exempt)</div>
     </section>
 
     <section class="card">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <input id="postAuthor" type="text" placeholder="Your name (username used for cooldown)" />
+        <div style="display:flex;flex-direction:column;gap:6px;width:180px">
+          <input id="postAuthor" type="text" placeholder="Your name (username used for cooldown)" />
+          <div style="display:flex;gap:8px;align-items:center">
+            <div id="avatarPreview" class="avatar initials">—</div>
+            <div style="flex:1">
+              <input id="avatarUrl" type="text" placeholder="avatar URL (optional)" />
+              <div class="avatar-controls">
+                <label class="ghost" style="cursor:pointer;padding:6px 10px;border-radius:8px">
+                  Upload<input id="avatarFile" type="file" accept="image/*" style="display:none">
+                </label>
+                <button id="saveAvatar" class="ghost">Save</button>
+                <button id="clearAvatar" class="ghost">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style="flex:1"></div>
         <div class="small" id="charCount">500</div>
       </div>
+
       <textarea id="postContent" maxlength="500" placeholder="Write something (markdown supported)"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button id="postBtn" class="btn">Post</button>
         <button id="previewToggle" class="ghost">Preview</button>
       </div>
-      <div id="preview" class="preview-card" style="margin-top:10px;display:none"></div>
+      <div id="preview" class="preview-card" style="display:none"></div>
     </section>
 
-    <div id="posts" style="margin-top:12px"></div>
+    <div id="posts"></div>
   </main>
 
-  <!-- right: theme editor -->
+  <!-- right: presets -->
   <aside class="right">
-    <section id="themeEditor" class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-weight:800">Theme Editor</div>
-        <div class="small">edit & save</div>
+    <section class="card">
+      <div style="font-weight:800;margin-bottom:8px">Presets</div>
+      <div style="display:flex;gap:8px">
+        <button class="ghost presetBtn" data-theme="dark-cozy">Dark</button>
+        <button class="ghost presetBtn" data-theme="cozy-warm">Cozy</button>
+        <button class="ghost presetBtn" data-theme="playful">Playful</button>
+        <button class="ghost presetBtn" data-theme="light-simple">Light</button>
       </div>
-      <div style="height:10px"></div>
-
-      <div style="margin-bottom:8px">
-        <input id="themeName" type="text" placeholder="new theme name" />
-      </div>
-
-      <div class="theme-inputs" style="margin-bottom:8px">
-        <input id="t_bg" type="text" placeholder="--bg (bg color)" />
-        <input id="t_panel" type="text" placeholder="--panel" />
-        <input id="t_ink" type="text" placeholder="--ink" />
-        <input id="t_accent" type="text" placeholder="--accent" />
-      </div>
-
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button id="saveThemeBtn" class="btn">Save Theme</button>
-        <button id="deleteThemeBtn" class="ghost">Delete</button>
-      </div>
-
-      <div style="height:10px"></div>
-      <div class="small">Presets included; create your own and they persist locally.</div>
+      <div style="height:12px"></div>
+      <div class="small">Avatars are stored locally. Upload or paste a URL, then Save.</div>
     </section>
   </aside>
 </div>
@@ -118,108 +112,38 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
-/* Theme system */
+/* THEMES (presets only) */
 const presets = {
-  "dark-cozy": {
-    "--bg":"#0b0f12","--panel":"#0f1417","--muted":"#9fb4c8","--accent":"#7ee7c7","--accent2":"#ff9ad0","--ink":"#e6eef3"
-  },
-  "cozy-warm": {
-    "--bg":"#f3efe8","--panel":"#fff6ee","--muted":"#8b7b74","--accent":"#d6a77a","--accent2":"#eabf9f","--ink":"#2f2a28"
-  },
-  "playful": {
-    "--bg":"#0f1020","--panel":"#131223","--muted":"#c6d8ff","--accent":"#ffb86b","--accent2":"#ff6bcb","--ink":"#f0f6ff"
-  },
-  "light-simple": {
-    "--bg":"#f7f7f7","--panel":"#ffffff","--muted":"#6b6b6b","--accent":"#6c9c7a","--accent2":"#9ec8c1","--ink":"#222"
-  }
+  "dark-cozy": {"--bg":"#0b0f12","--panel":"#0f1417","--muted":"#9fb4c8","--accent":"#7ee7c7","--accent2":"#ff9ad0","--ink":"#e6eef3"},
+  "cozy-warm": {"--bg":"#f3efe8","--panel":"#fff6ee","--muted":"#8b7b74","--accent":"#d6a77a","--accent2":"#eabf9f","--ink":"#2f2a28"},
+  "playful": {"--bg":"#0f1020","--panel":"#131223","--muted":"#c6d8ff","--accent":"#ffb86b","--accent2":"#ff6bcb","--ink":"#f0f6ff"},
+  "light-simple": {"--bg":"#f7f7f7","--panel":"#ffffff","--muted":"#6b6b6b","--accent":"#6c9c7a","--accent2":"#9ec8c1","--ink":"#222"}
 };
-
-const LS_THEMES_KEY = 'blogjs_custom_themes_v1';
-const LS_ACTIVE_KEY = 'blogjs_active_theme_v1';
-const LS_POSTS_KEY = 'blogjs_posts_v1';
-const LS_LASTPOST_KEY = 'blogjs_lastposts_v1'; // map username -> timestamp
-
-function loadCustomThemes(){ try{ const raw = localStorage.getItem(LS_THEMES_KEY); return raw ? JSON.parse(raw) : {}; }catch(e){return{}}}
-function saveCustomThemes(obj){ localStorage.setItem(LS_THEMES_KEY, JSON.stringify(obj)); }
-function getAllThemes(){ return Object.assign({}, presets, loadCustomThemes()); }
+const LS_ACTIVE = 'blogjs_active_theme_v1';
+const LS_POSTS = 'blogjs_posts_v1';
+const LS_LAST = 'blogjs_lastposts_v1';
+const LS_AVATARS = 'blogjs_avatars_v1';
 
 const themeSelect = document.getElementById('themeSelect');
-const editThemeBtn = document.getElementById('editThemeBtn');
-const themeEditor = document.getElementById('themeEditor');
-const themeNameInput = document.getElementById('themeName');
-const saveThemeBtn = document.getElementById('saveThemeBtn');
-const deleteThemeBtn = document.getElementById('deleteThemeBtn');
-const t_bg = document.getElementById('t_bg');
-const t_panel = document.getElementById('t_panel');
-const t_ink = document.getElementById('t_ink');
-const t_accent = document.getElementById('t_accent');
-
-function applyTheme(themeObj){
-  const root = document.documentElement;
-  for (const k in themeObj) root.style.setProperty(k, themeObj[k]);
-}
-function applyThemeByName(name){
-  const themes = getAllThemes();
-  const t = themes[name];
-  if (!t) return;
-  applyTheme(t);
-  localStorage.setItem(LS_ACTIVE_KEY, name);
-  populateThemeInputs(t);
-  themeSelect.value = name;
-}
-function populateThemeSelector(){
-  const themes = getAllThemes();
+function populateThemes(){
   themeSelect.innerHTML = '';
-  Object.keys(themes).forEach(n=>{
-    const opt = document.createElement('option'); opt.value = n; opt.textContent = n;
-    themeSelect.appendChild(opt);
+  Object.keys(presets).forEach(k=>{
+    const o = document.createElement('option'); o.value = k; o.textContent = k;
+    themeSelect.appendChild(o);
   });
 }
-function populateThemeInputs(t){
-  t = t || {};
-  t_bg.value = t['--bg'] || '';
-  t_panel.value = t['--panel'] || '';
-  t_ink.value = t['--ink'] || '';
-  t_accent.value = t['--accent'] || '';
+function applyTheme(name){
+  const t = presets[name]; if(!t) return;
+  for(const k in t) document.documentElement.style.setProperty(k, t[k]);
+  localStorage.setItem(LS_ACTIVE, name);
 }
+populateThemes();
+const startTheme = localStorage.getItem(LS_ACTIVE) || Object.keys(presets)[0];
+themeSelect.value = startTheme; applyTheme(startTheme);
+themeSelect.addEventListener('change', ()=> applyTheme(themeSelect.value));
+document.querySelectorAll('.presetBtn').forEach(b=> b.addEventListener('click', ()=> { applyTheme(b.dataset.theme); themeSelect.value = b.dataset.theme; }));
 
-themeSelect.addEventListener('change', ()=> applyThemeByName(themeSelect.value));
-editThemeBtn.addEventListener('click', ()=> themeEditor.classList.toggle('open') );
-saveThemeBtn.addEventListener('click', ()=>{
-  const name = (themeNameInput.value || themeSelect.value || 'custom').trim();
-  if (!name) return alert('give the theme a name');
-  const custom = loadCustomThemes();
-  custom[name] = {
-    "--bg": t_bg.value || getComputedStyle(document.documentElement).getPropertyValue('--bg'),
-    "--panel": t_panel.value || getComputedStyle(document.documentElement).getPropertyValue('--panel'),
-    "--ink": t_ink.value || getComputedStyle(document.documentElement).getPropertyValue('--ink'),
-    "--accent": t_accent.value || getComputedStyle(document.documentElement).getPropertyValue('--accent')
-  };
-  saveCustomThemes(custom);
-  populateThemeSelector();
-  applyThemeByName(name);
-  alert('theme saved locally');
-});
-deleteThemeBtn.addEventListener('click', ()=>{
-  const name = themeSelect.value;
-  if (!name) return;
-  if (presets[name]) return alert('cannot delete preset');
-  const custom = loadCustomThemes();
-  if (!custom[name]) return alert('no custom theme selected');
-  if (!confirm('Delete theme \"' + name + '\"?')) return;
-  delete custom[name];
-  saveCustomThemes(custom);
-  populateThemeSelector();
-  const first = themeSelect.options[0]?.value;
-  if (first) applyThemeByName(first);
-});
-
-// init theme UI
-populateThemeSelector();
-const active = localStorage.getItem(LS_ACTIVE_KEY) || Object.keys(presets)[0];
-applyThemeByName(active);
-
-// POSTS: local store with optional server sync
+/* POSTS (local + server fallback) */
 const postBtn = document.getElementById('postBtn');
 const postAuthor = document.getElementById('postAuthor');
 const postContent = document.getElementById('postContent');
@@ -229,165 +153,156 @@ const previewToggle = document.getElementById('previewToggle');
 const charCount = document.getElementById('charCount');
 
 const CHAR_LIMIT = 500;
-const COOLDOWN_MS = 15 * 60 * 1000;
+const COOLDOWN_MS = 15*60*1000;
 const EXEMPT = 'fries';
 
-function loadLocalPosts(){
-  try{
-    const raw = localStorage.getItem(LS_POSTS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){ return [];}
-}
-function saveLocalPosts(arr){ localStorage.setItem(LS_POSTS_KEY, JSON.stringify(arr)); }
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_POSTS) || '[]'); }catch(e){return[]} }
+function saveLocal(arr){ localStorage.setItem(LS_POSTS, JSON.stringify(arr)); }
+function loadLast(){ try{ return JSON.parse(localStorage.getItem(LS_LAST) || '{}'); }catch(e){return{}} }
+function saveLast(m){ localStorage.setItem(LS_LAST, JSON.stringify(m)); }
+function loadAvatars(){ try{ return JSON.parse(localStorage.getItem(LS_AVATARS) || '{}'); }catch(e){return{}} }
+function saveAvatars(m){ localStorage.setItem(LS_AVATARS, JSON.stringify(m)); }
 
-function loadLastPostsMap(){ try{ const raw = localStorage.getItem(LS_LASTPOST_KEY); return raw ? JSON.parse(raw) : {}; }catch(e){return{} } }
-function saveLastPostsMap(mp){ localStorage.setItem(LS_LASTPOST_KEY, JSON.stringify(mp)); }
-
-let LOCAL_POSTS = loadLocalPosts(); // newest-first
+let LOCAL = loadLocal();
 function renderPosts(){
-  postsEl.innerHTML = '';
-  for (const p of LOCAL_POSTS){
-    const d = document.createElement('div'); d.className = 'post';
-    d.innerHTML = `
-      <div class="meta"><div class="author">${escapeHtml(p.author)}</div><div class="small">${new Date(p.timestamp).toLocaleString()}</div></div>
-      <div class="content">${DOMPurify.sanitize(marked.parse(p.content || ''))}</div>
-    `;
+  postsEl.innerHTML='';
+  for(const p of LOCAL){
+    const d=document.createElement('div'); d.className='post';
+    const avatarHtml = renderAvatar(p.author, p.avatar);
+    d.innerHTML = `<div style="flex:0 0 48px">${avatarHtml}</div>
+                   <div style="flex:1">
+                     <div class="meta"><div class="author">${escape(p.author)}</div><div class="time">${new Date(p.timestamp).toLocaleString()}</div></div>
+                     <div class="content">${DOMPurify.sanitize(marked.parse(p.content||''))}</div>
+                   </div>`;
     postsEl.appendChild(d);
   }
 }
+function escape(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
 
-// when posting: try server POST /posts; if 200 use server response; else fallback to local store
-async function submitPost(){
-  const author = (postAuthor.value || 'anon').trim();
-  const content = postContent.value.trim();
-  if (!content) return alert('write something first');
-  if (content.length > CHAR_LIMIT) return alert('max 500 chars');
-
-  // cooldown
-  if (author.toLowerCase() !== EXEMPT){
-    const lastMap = loadLastPostsMap();
-    const last = lastMap[author] ? new Date(lastMap[author]).getTime() : 0;
-    const now = Date.now();
-    if (now - last < COOLDOWN_MS) {
-      const left = Math.ceil((COOLDOWN_MS - (now - last))/60000);
-      return alert(`cooldown active — wait ${left}m`);
-    }
+function renderAvatar(username, avatarData){
+  // avatarData can be URL or dataURL. If provided, show <img>. Else show initials circle.
+  if (avatarData){
+    const url = avatarData;
+    return `<img class="avatar" src="${url}" alt="${escape(username)}'s avatar">`;
   }
-
-  // try server
-  let usePost = null;
-  try{
-    const resp = await fetch('/posts', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ content, author })
-    });
-    if (resp.ok){
-      const j = await resp.json();
-      usePost = j.post || j;
-    }
-  }catch(e){ /* server unavailable, fallback to local */ }
-
-  if (!usePost){
-    usePost = { id: Date.now().toString(36), author, content, timestamp: new Date().toISOString() };
-    LOCAL_POSTS.unshift(usePost);
-    saveLocalPosts(LOCAL_POSTS);
-  } else {
-    // server returned a post object; still store locally for UI continuity
-    LOCAL_POSTS.unshift(usePost);
-    saveLocalPosts(LOCAL_POSTS);
-  }
-
-  // update last post map
-  const lastMap = loadLastPostsMap();
-  lastMap[author] = usePost.timestamp;
-  saveLastPostsMap(lastMap);
-
-  // UI updates
-  renderPosts();
-  postContent.value = '';
-  charCount.textContent = CHAR_LIMIT;
-  preview.style.display = 'none';
-  runConfetti();
+  const initials = (username||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '?';
+  return `<div class="avatar initials">${escape(initials)}</div>`;
 }
 
-// preview and charcount
+/* Avatar UI */
+const avatarPreview = document.getElementById('avatarPreview');
+const avatarUrl = document.getElementById('avatarUrl');
+const avatarFile = document.getElementById('avatarFile');
+const saveAvatar = document.getElementById('saveAvatar');
+const clearAvatar = document.getElementById('clearAvatar');
+
+function updateAvatarPreviewFor(name){
+  const map = loadAvatars();
+  const a = map[name] || null;
+  if (a){
+    avatarPreview.innerHTML = `<img src="${a}" class="avatar">`;
+  } else {
+    const initials = (name||'').split(/\s+/).map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
+    avatarPreview.innerHTML = `<div class="avatar initials">${initials}</div>`;
+  }
+}
+
+avatarFile.addEventListener('change', ()=> {
+  const f = avatarFile.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => { avatarUrl.value = reader.result; avatarPreview.innerHTML = `<img class="avatar" src="${reader.result}">`; };
+  reader.readAsDataURL(f);
+});
+
+saveAvatar.addEventListener('click', ()=> {
+  const name = (postAuthor.value || '').trim();
+  if (!name) return alert('enter a name to save avatar for');
+  const url = avatarUrl.value.trim();
+  if (!url) return alert('paste a URL or upload a file first');
+  const map = loadAvatars(); map[name] = url; saveAvatars(map);
+  updateAvatarPreviewFor(name);
+  alert('avatar saved locally');
+});
+clearAvatar.addEventListener('click', ()=> {
+  const name = (postAuthor.value || '').trim();
+  if (!name) return alert('enter a name');
+  const map = loadAvatars(); delete map[name]; saveAvatars(map);
+  avatarUrl.value = ''; avatarFile.value = ''; updateAvatarPreviewFor(name);
+});
+
+postAuthor.addEventListener('input', ()=> updateAvatarPreviewFor(postAuthor.value.trim()));
+
+/* Posting logic */
 postContent.addEventListener('input', ()=> charCount.textContent = CHAR_LIMIT - postContent.value.length);
 previewToggle.addEventListener('click', ()=>{
   if (preview.style.display === 'none' || preview.style.display === '') {
     preview.innerHTML = DOMPurify.sanitize(marked.parse(postContent.value || ''));
     preview.style.display = 'block';
-  } else { preview.style.display = 'none'; }
+  } else preview.style.display = 'none';
 });
+
+async function submitPost(){
+  const author = (postAuthor.value||'anon').trim();
+  const content = postContent.value.trim();
+  if (!content) return alert('write something first');
+  if (content.length > CHAR_LIMIT) return alert('too long');
+
+  // cooldown
+  if (author.toLowerCase() !== EXEMPT){
+    const last = loadLast()[author] ? new Date(loadLast()[author]).getTime() : 0;
+    if (Date.now() - last < COOLDOWN_MS) return alert('cooldown active');
+  }
+
+  const avatars = loadAvatars();
+  const avatarForAuthor = avatars[author] || null;
+
+  let postObj = null;
+  try{
+    // attempt server post (server may ignore avatar)
+    const r = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content, author })});
+    if (r.ok){
+      const j = await r.json();
+      postObj = j.post || j;
+      // attach avatar locally for UI
+      postObj.avatar = avatarForAuthor;
+    }
+  }catch(e){}
+
+  if (!postObj){
+    postObj = { id: Date.now().toString(36), author, content, timestamp: new Date().toISOString(), avatar: avatarForAuthor };
+  }
+
+  LOCAL.unshift(postObj); saveLocal(LOCAL);
+  const lastMap = loadLast(); lastMap[author] = postObj.timestamp; saveLast(lastMap);
+  renderPosts();
+  postContent.value=''; charCount.textContent = CHAR_LIMIT; preview.style.display='none';
+  try{ confetti({ particleCount: 40, spread: 60, origin:{ y:0.4 } }); }catch(e){}
+}
 postBtn.addEventListener('click', submitPost);
 
-// initial render
-renderPosts();
-
-// small confetti
-function runConfetti(){
-  try{
-    confetti({ particleCount: 60, spread: 60, origin: { y: 0.4 }});
-  }catch(e){
-    // fallback tiny squares
-    for (let i=0;i<30;i++){
-      const el = document.createElement('div');
-      el.style.position='fixed';
-      el.style.left = (50 + (Math.random()-0.5)*60) + 'vw';
-      el.style.top = '-5vh';
-      el.style.width = el.style.height = (6 + Math.random()*8) + 'px';
-      el.style.background = 'hsl(' + Math.floor(Math.random()*360) + ',70%,60%)';
-      el.style.opacity = Math.random()*0.9 + 0.4;
-      el.style.borderRadius = '2px';
-      el.style.zIndex = 9999;
-      document.body.appendChild(el);
-      const fall = 1200 + Math.random()*1000;
-      el.animate([{ transform: 'translateY(0)', opacity:1 }, { transform: 'translateY(110vh)', opacity:0 }], { duration: fall, iterations:1, easing:'cubic-bezier(.2,.8,.2,1)'});
-      setTimeout(()=> el.remove(), fall+100);
-    }
-  }
-}
-
-// helpers
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
-
-// optional: sync any locally stored posts to server (call manually)
-async function syncLocalToServer(){
-  const arr = loadLocalPosts();
-  for (const p of arr.slice().reverse()){ // oldest-first
-    try{
-      const resp = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content: p.content, author: p.author })});
-      if (resp.ok){
-        // remove local copy on success
-        const idx = LOCAL_POSTS.findIndex(x=>x.id===p.id);
-        if (idx !== -1) LOCAL_POSTS.splice(idx,1);
-      }
-    }catch(e){}
-  }
-  saveLocalPosts(LOCAL_POSTS);
-}
-
-// expose tiny dev helpers (optional)
-window.blogjs = { syncLocalToServer, loadLocalPosts, saveLocalPosts, runConfetti };
-
-// defensive: keep UI responsive if server returns new posts (poll)
+/* periodic server merge */
 setInterval(async ()=>{
   try{
     const r = await fetch('/posts');
     if (!r.ok) return;
     const arr = await r.json();
-    // merge server posts into LOCAL_POSTS, avoid duplicates by id
-    const ids = new Set(LOCAL_POSTS.map(p=>p.id));
-    for (const p of arr){
-      if (!ids.has(p.id)){
-        LOCAL_POSTS.unshift(p);
-        ids.add(p.id);
-      }
+    const ids = new Set(LOCAL.map(p=>p.id));
+    for (const p of arr) if (!ids.has(p.id)) {
+      // don't have avatar from server, try local avatar map
+      const map = loadAvatars();
+      p.avatar = map[p.author] || null;
+      LOCAL.unshift(p);
     }
-    saveLocalPosts(LOCAL_POSTS);
-    renderPosts();
+    saveLocal(LOCAL); renderPosts();
   }catch(e){}
-}, 8000);
+},8000);
+
+/* initial load */
+LOCAL = loadLocal();
+renderPosts();
+updateAvatarPreviewFor(postAuthor.value.trim());
+
 </script>
 </body>
 </html>
