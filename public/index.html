@@ -1,251 +1,343 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Blog.js</title>
+<script>
+const $ = id => document.getElementById(id);
+const CHAR_LIMIT = 500;
+const EXEMPT = 'fries';
+let currentUser = null;
+let shown = new Set();
 
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-  <style>
-    :root{
-      --bg:#0b0f12; --panel:#13181c; --muted:#7a8a99;
-      --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
-      --soft-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#0b0f12);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
-    .wrap{max-width:880px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:18px}
-    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    h1{margin:0;font-size:20px}
-    .sub{color:var(--muted);font-size:13px}
-    .card{background:var(--panel);border-radius:12px;padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(255,255,255,0.05)}
-    /* posts */
-    #posts{display:flex;flex-direction:column;gap:12px}
-    .post{padding:14px;border-radius:12px;background:linear-gradient(180deg,#13181c,#1a2129);border:1px solid rgba(255,255,255,0.03);animation:lift .28s ease;overflow:hidden}
-    @keyframes lift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-    .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
-    .author{font-weight:700;color:var(--accent2)}
-    .content{color:var(--ink);line-height:1.5;word-wrap:break-word}
-    /* auth / composer */
-    input, textarea, button{font-family:inherit}
-    input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:#1a2129;color:var(--ink)}
-    textarea{min-height:92px;resize:vertical}
-    .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#0b0f12;font-weight:700;cursor:pointer}
-    .muted{color:var(--muted);font-size:13px}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px;border-radius:10px;cursor:pointer}
-    .cozy {font-size:13px;color:var(--muted)}
-    .charcount{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
-    @media (max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Blog.js</h1>
-        <div class="sub">cozy. slow. markdown-friendly.</div>
-      </div>
-      <div class="card" style="display:flex;gap:10px;align-items:center">
-        <div style="min-width:160px">
-          <div id="meName" style="font-weight:800;color:var(--accent)"></div>
-          <div id="meSub" class="cozy">not signed in</div>
-        </div>
-        <div style="margin-left:auto">
-          <button id="logoutBtn" class="ghost" style="display:none">Logout</button>
-        </div>
-      </div>
-    </header>
+/* styles for embedded content */
+const style = document.createElement('style');
+style.textContent = `
+.embedded-image{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+.link-preview{display:flex;gap:10px;align-items:flex-start;border-radius:8px;padding:8px;margin-top:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+.link-preview img.favicon{width:28px;height:28px;border-radius:6px;flex:0 0 28px;object-fit:cover}
+.link-preview .meta{display:flex;flex-direction:column}
+.link-preview .meta .title{font-weight:700;color:var(--ink)}
+.link-preview .meta .desc{color:var(--muted);font-size:13px;margin-top:4px}
+`;
+document.head.appendChild(style);
 
-    <!-- feed column -->
-    <main>
-      <section class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:800">Feed</div>
-        <div class="muted">Newest at top • 500 char limit • 15m cooldown</div>
-      </section>
+/* render markdown then enhance links/images */
+function renderMd(md){
+  try { return DOMPurify.sanitize(marked.parse(md||'')); }
+  catch(e){ return DOMPurify.sanitize(md||''); }
+}
 
-      <div id="posts"></div>
-    </main>
+/* quick domain helper */
+function domainFromUrl(u){
+  try { return new URL(u).hostname.replace(/^www\./, ''); } catch(e){ return u; }
+}
 
-    <!-- right column -->
-    <aside>
-      <section id="authCard" class="card">
-        <div style="font-weight:700;margin-bottom:8px">Account</div>
-        <input id="u_name" placeholder="username" />
-        <div style="height:8px"></div>
-        <input id="u_pass" type="password" placeholder="password" />
-        <div style="height:10px"></div>
-        <div style="display:flex;gap:8px">
-          <button id="authBtn" class="btn">Login</button>
-          <button id="toggleAuth" class="ghost">Sign up</button>
-        </div>
-        <div style="height:10px"></div>
-        <div class="cozy">view only if not signed in</div>
-      </section>
+/* detect image URL */
+const IMG_RE = /\.(jpe?g|png|gif|webp|avif|svg)(\?.*)?$/i;
 
-      <section id="composer" class="card" style="margin-top:14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-weight:700" id="displayName">guest</div>
-          <div id="composerClock" class="cozy" style="margin-left:auto"></div>
-        </div>
-        <textarea id="content" maxlength="500" placeholder="Write something gentle and short..."></textarea>
-        <div class="charcount"><span id="charsLeft">500</span> chars left</div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button id="postBtn" class="btn">Post • ✨</button>
-          <button id="previewBtn" class="ghost">Preview</button>
-        </div>
-        <div id="preview" class="card" style="margin-top:10px;display:none"></div>
-      </section>
-    </aside>
-  </div>
+/* try to fetch page HTML and extract title + description og/meta; may fail due to CORS */
+async function fetchPageMeta(href){
+  try{
+    const res = await fetch(href, { mode: 'cors' });
+    const text = await res.text();
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const title = doc.querySelector('meta[property="og:title"]')?.content
+                || doc.querySelector('meta[name="title"]')?.content
+                || doc.querySelector('title')?.textContent
+                || null;
+    const desc = doc.querySelector('meta[property="og:description"]')?.content
+              || doc.querySelector('meta[name="description"]')?.content
+              || null;
+    return { title, desc };
+  }catch(e){
+    return null;
+  }
+}
 
-  <!-- libs -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+/* build fallback preview node */
+function makeFallbackPreview(href){
+  const div = document.createElement('div');
+  div.className = 'link-preview';
+  const fav = document.createElement('img');
+  fav.className = 'favicon';
+  fav.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domainFromUrl(href));
+  fav.alt = '';
+  fav.loading = 'lazy';
+  fav.classList.add('favicon');
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const title = document.createElement('div');
+  title.className = 'title';
+  title.textContent = domainFromUrl(href);
+  const desc = document.createElement('div');
+  desc.className = 'desc';
+  desc.textContent = href;
+  meta.appendChild(title);
+  meta.appendChild(desc);
+  div.appendChild(fav);
+  div.appendChild(meta);
+  // make clickable
+  div.addEventListener('click', ()=> window.open(href, '_blank', 'noopener'));
+  return div;
+}
 
-  <script>
-    const $ = id => document.getElementById(id);
-    const CHAR_LIMIT = 500;
-    const EXEMPT = 'fries';
-    let currentUser = null;
-    let shown = new Set();
+/* populate preview node with fetched meta */
+function fillPreviewNode(node, href, meta){
+  node.innerHTML = '';
+  const fav = document.createElement('img');
+  fav.className = 'favicon';
+  fav.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domainFromUrl(href));
+  fav.alt = '';
+  fav.loading = 'lazy';
+  const metaWrap = document.createElement('div');
+  metaWrap.className = 'meta';
+  const title = document.createElement('div');
+  title.className = 'title';
+  title.textContent = meta?.title || domainFromUrl(href);
+  const desc = document.createElement('div');
+  desc.className = 'desc';
+  desc.textContent = meta?.desc || href;
+  metaWrap.appendChild(title);
+  metaWrap.appendChild(desc);
+  node.appendChild(fav);
+  node.appendChild(metaWrap);
+  node.addEventListener('click', ()=> window.open(href, '_blank', 'noopener'));
+}
 
-    function renderMd(md){
-      try { return DOMPurify.sanitize(marked.parse(md||'')); }
-      catch(e){ return DOMPurify.sanitize(md||''); }
-    }
+/* takes sanitized HTML string, returns element with images inserted and previews appended.
+   Previews that need metadata fetch are filled asynchronously; function returns immediately. */
+function enhanceHtmlToNode(sanitizedHtml){
+  const container = document.createElement('div');
+  container.innerHTML = sanitizedHtml;
 
-    function makePostEl(p){
-      const el = document.createElement('div');
-      el.className = 'post';
-      el.innerHTML = `
-        <div class="meta">
-          <div class="author">${escapeHtml(p.author)}</div>
-          <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
-        </div>
-        <div class="content">${renderMd(p.content||'')}</div>
-      `;
-      return el;
+  // replace markdown image syntax already handled by marked; we still detect bare links
+  const anchors = Array.from(container.querySelectorAll('a[href]'));
+  anchors.forEach(a=>{
+    const href = a.href;
+    // image URL -> replace anchor with <img>
+    if (IMG_RE.test(href)){
+      const img = document.createElement('img');
+      img.src = href;
+      img.className = 'embedded-image';
+      img.alt = a.textContent || '';
+      img.loading = 'lazy';
+      a.replaceWith(img);
+      return;
     }
 
-    function prependPost(p){
-      if (!p || !p.id) return;
-      if (shown.has(p.id)) return;
-      const node = makePostEl(p);
-      $('posts').insertBefore(node, $('posts').firstChild);
-      shown.add(p.id);
+    // non-image link -> append preview placeholder after the anchor
+    const previewNode = document.createElement('div');
+    previewNode.className = 'link-preview';
+    previewNode.textContent = 'Loading preview...';
+    // insert after link
+    if (a.parentNode) {
+      a.parentNode.insertBefore(previewNode, a.nextSibling);
     }
+    // async fetch meta
+    (async ()=>{
+      const meta = await fetchPageMeta(href);
+      if (meta){
+        fillPreviewNode(previewNode, href, meta);
+      } else {
+        const fallback = makeFallbackPreview(href);
+        previewNode.replaceWith(fallback);
+      }
+    })();
+  });
 
-    async function loadPosts(){
+  // also detect raw URLs in plain text nodes (not links) and convert image URLs to images and other URLs to links+preview
+  const treeWalker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+  const textNodes = [];
+  while(treeWalker.nextNode()) textNodes.push(treeWalker.currentNode);
+  const URL_RE = /https?:\/\/[^\s<>'"]+/g;
+  textNodes.forEach(tn=>{
+    const str = tn.nodeValue;
+    if (!str) return;
+    const matches = [...str.matchAll(URL_RE)];
+    if (matches.length === 0) return;
+    const frag = document.createDocumentFragment();
+    let lastIndex = 0;
+    matches.forEach(m=>{
+      const idx = m.index;
+      const url = m[0];
+      // text before
+      if (idx > lastIndex) frag.appendChild(document.createTextNode(str.slice(lastIndex, idx)));
+      // create anchor or image
+      if (IMG_RE.test(url)){
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'embedded-image';
+        img.alt = '';
+        img.loading = 'lazy';
+        frag.appendChild(img);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.textContent = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        frag.appendChild(a);
+        // preview placeholder
+        const previewNode = document.createElement('div');
+        previewNode.className = 'link-preview';
+        previewNode.textContent = 'Loading preview...';
+        frag.appendChild(previewNode);
+        (async ()=>{
+          const meta = await fetchPageMeta(url);
+          if (meta) fillPreviewNode(previewNode, url, meta);
+          else {
+            const fallback = makeFallbackPreview(url);
+            previewNode.replaceWith(fallback);
+          }
+        })();
+      }
+      lastIndex = idx + url.length;
+    });
+    if (lastIndex < str.length) frag.appendChild(document.createTextNode(str.slice(lastIndex)));
+    tn.parentNode.replaceChild(frag, tn);
+  });
+
+  return container;
+}
+
+/* create post element (uses enhancement) */
+function makePostEl(p){
+  const el = document.createElement('div');
+  el.className = 'post';
+  const metaHtml = `
+    <div class="meta">
+      <div class="author">${escapeHtml(p.author)}</div>
+      <div class="timestamp">${new Date(p.timestamp).toLocaleString()}</div>
+    </div>
+  `;
+  el.innerHTML = metaHtml;
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'content';
+  const sanitized = renderMd(p.content||'');
+  const enhancedNode = enhanceHtmlToNode(sanitized);
+  // move children into contentDiv
+  while(enhancedNode.firstChild) contentDiv.appendChild(enhancedNode.firstChild);
+  el.appendChild(contentDiv);
+  return el;
+}
+
+function prependPost(p){
+  if (!p || !p.id) return;
+  if (shown.has(p.id)) return;
+  const node = makePostEl(p);
+  $('posts').insertBefore(node, $('posts').firstChild);
+  shown.add(p.id);
+}
+
+/* rest of code unchanged: loadPosts, whoami, refreshUI, auth, composer, etc. */
+
+async function loadPosts(){
+  const res = await fetch('/posts');
+  const arr = await res.json();
+  // newest-first
+  arr.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+  $('posts').innerHTML = '';
+  shown.clear();
+  for (const p of arr) {
+    const node = makePostEl(p);
+    $('posts').appendChild(node);
+    shown.add(p.id);
+  }
+}
+
+async function whoami(){
+  try{
+    const r = await fetch('/me');
+    if (!r.ok) return { user: null };
+    return await r.json();
+  } catch { return { user: null }; }
+}
+
+async function refreshUI(){
+  const m = await whoami();
+  currentUser = m.user || null;
+  if (currentUser){
+    $('meName').textContent = currentUser;
+    $('meSub').textContent = 'signed in';
+    $('logoutBtn').style.display = 'inline-block';
+    $('displayName').textContent = currentUser;
+    $('authCard').style.display = 'none';
+  } else {
+    $('meName').textContent = '';
+    $('meSub').textContent = 'not signed in';
+    $('logoutBtn').style.display = 'none';
+    $('displayName').textContent = 'guest';
+    $('authCard').style.display = '';
+  }
+}
+
+// auth flows
+let signingUp = false;
+$('toggleAuth').addEventListener('click', ()=> {
+  signingUp = !signingUp;
+  $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
+  $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
+});
+
+$('authBtn').addEventListener('click', async ()=>{
+  const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
+  if (!u || !p) return alert('username + password required');
+  const ep = signingUp ? '/signup' : '/login';
+  const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p })});
+  const j = await res.json().catch(()=>({}));
+  if (!res.ok) return alert(j.error || 'auth failed');
+  $('u_name').value=''; $('u_pass').value='';
+  await refreshUI();
+  await loadPosts();
+});
+
+$('logoutBtn').addEventListener('click', async ()=>{
+  await fetch('/logout',{ method:'POST' }).catch(()=>{});
+  currentUser = null; shown.clear();
+  await refreshUI();
+  await loadPosts();
+});
+
+// composer
+$('content').addEventListener('input', ()=> {
+  const left = CHAR_LIMIT - $('content').value.length;
+  $('charsLeft').textContent = left;
+});
+
+$('previewBtn').addEventListener('click', ()=> {
+  const raw = $('content').value || '';
+  const sanitized = renderMd(raw);
+  const node = enhanceHtmlToNode(sanitized);
+  $('preview').innerHTML = '';
+  while(node.firstChild) $('preview').appendChild(node.firstChild);
+  $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
+});
+
+$('postBtn').addEventListener('click', async ()=>{
+  const content = $('content').value.trim();
+  if (!content) return alert('write something first');
+  if (content.length > CHAR_LIMIT) return alert(`max ${CHAR_LIMIT} chars`);
+  if (!currentUser) return alert('log in to post');
+
+  const res = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content })});
+  const j = await res.json().catch(()=>({}));
+  if (!res.ok) return alert(j.error || 'post failed');
+  const newPost = j.post || j;
+  confetti({ particleCount: 45, spread: 70, origin: { y: 0.35 }});
+  prependPost(newPost);
+  $('content').value = ''; $('charsLeft').textContent = CHAR_LIMIT; $('preview').style.display='none';
+});
+
+// helpers
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+// init
+(async function init(){
+  await refreshUI();
+  await loadPosts();
+  setInterval(async ()=>{
+    try{
       const res = await fetch('/posts');
       const arr = await res.json();
-      // ensure newest-first by timestamp, then render in that order
-      arr.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-      $('posts').innerHTML = '';
-      shown.clear();
-      for (const p of arr) {
-        const node = makePostEl(p);
-        $('posts').appendChild(node);
-        shown.add(p.id);
-      }
-    }
-
-    async function whoami(){
-      try{
-        const r = await fetch('/me');
-        if (!r.ok) return { user: null };
-        return await r.json();
-      } catch { return { user: null }; }
-    }
-
-    async function refreshUI(){
-      const m = await whoami();
-      currentUser = m.user || null;
-      if (currentUser){
-        $('meName').textContent = currentUser;
-        $('meSub').textContent = 'signed in';
-        $('logoutBtn').style.display = 'inline-block';
-        $('displayName').textContent = currentUser;
-        $('authCard').style.display = 'none';
-      } else {
-        $('meName').textContent = '';
-        $('meSub').textContent = 'not signed in';
-        $('logoutBtn').style.display = 'none';
-        $('displayName').textContent = 'guest';
-        $('authCard').style.display = '';
-      }
-    }
-
-    // auth flows
-    let signingUp = false;
-    $('toggleAuth').addEventListener('click', ()=> {
-      signingUp = !signingUp;
-      $('authBtn').textContent = signingUp ? 'Sign up' : 'Login';
-      $('toggleAuth').textContent = signingUp ? 'Have an account?' : 'Sign up';
-    });
-
-    $('authBtn').addEventListener('click', async ()=>{
-      const u = $('u_name').value.trim(), p = $('u_pass').value.trim();
-      if (!u || !p) return alert('username + password required');
-      const ep = signingUp ? '/signup' : '/login';
-      const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, password: p })});
-      const j = await res.json().catch(()=>({}));
-      if (!res.ok) return alert(j.error || 'auth failed');
-      $('u_name').value=''; $('u_pass').value='';
-      await refreshUI();
-      await loadPosts();
-    });
-
-    $('logoutBtn').addEventListener('click', async ()=>{
-      await fetch('/logout',{ method:'POST' }).catch(()=>{});
-      currentUser = null; shown.clear();
-      await refreshUI();
-      await loadPosts();
-    });
-
-    // composer
-    $('content').addEventListener('input', ()=> {
-      const left = CHAR_LIMIT - $('content').value.length;
-      $('charsLeft').textContent = left;
-    });
-
-    $('previewBtn').addEventListener('click', ()=> {
-      const raw = $('content').value || '';
-      $('preview').innerHTML = renderMd(raw);
-      $('preview').style.display = $('preview').style.display === 'none' ? 'block' : 'none';
-    });
-
-    $('postBtn').addEventListener('click', async ()=>{
-      const content = $('content').value.trim();
-      if (!content) return alert('write something first');
-      if (content.length > CHAR_LIMIT) return alert(`max ${CHAR_LIMIT} chars`);
-      if (!currentUser) return alert('log in to post');
-
-      const res = await fetch('/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ content })});
-      const j = await res.json().catch(()=>({}));
-      if (!res.ok) return alert(j.error || 'post failed');
-      const newPost = j.post || j;
-      confetti({ particleCount: 45, spread: 70, origin: { y: 0.35 }});
-      prependPost(newPost);
-      $('content').value = ''; $('charsLeft').textContent = CHAR_LIMIT; $('preview').style.display='none';
-    });
-
-    // helpers
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
-
-    // init
-    (async function init(){
-      await refreshUI();
-      await loadPosts();
-      setInterval(async ()=>{
-        try{
-          const res = await fetch('/posts');
-          const arr = await res.json();
-          for (const p of arr) if (!shown.has(p.id)) prependPost(p);
-        }catch(e){}
-      },7000);
-      setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
-    })();
-  </script>
-</body>
-</html>
+      for (const p of arr) if (!shown.has(p.id)) prependPost(p);
+    }catch(e){}
+  },7000);
+  setInterval(()=> $('composerClock').textContent = new Date().toLocaleTimeString(), 1000);
+})();
+</script>
