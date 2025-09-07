@@ -1,14 +1,15 @@
-// blog.js
+// server.js
 const express = require('express');
+const path = require('path');
 const cookieParser = require('cookie-parser');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs'); // bcryptjs avoids native build failures
 const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Set SUPABASE_URL and SUPABASE_KEY env vars.');
+  console.error('Missing SUPABASE_URL or SUPABASE_KEY env vars.');
   process.exit(1);
 }
 
@@ -17,8 +18,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(__dirname)); // serve index.html etc.
 
+// serve static frontend from /public
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+// config
 const CHAR_LIMIT = 500;
 const COOLDOWN_MS = 15 * 60 * 1000;
 const EXEMPT_USERNAME = 'fries';
@@ -47,9 +52,7 @@ async function getLatestPostTimestamp(username) {
   return data ? new Date(data.timestamp).getTime() : null;
 }
 
-// endpoints
-
-// signup
+// auth routes
 app.post('/signup', async (req, res) => {
   try {
     const { username, password } = req.body || {};
@@ -69,12 +72,11 @@ app.post('/signup', async (req, res) => {
     res.cookie('user', data.username, { httpOnly: true, sameSite: 'lax' });
     return res.json({ status: 'ok', user: data.username });
   } catch (err) {
-    console.error('signup', err);
+    console.error('signup error', err);
     return res.status(500).json({ error: 'server error' });
   }
 });
 
-// login
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body || {};
@@ -89,18 +91,17 @@ app.post('/login', async (req, res) => {
     res.cookie('user', user.username, { httpOnly: true, sameSite: 'lax' });
     return res.json({ status: 'ok', user: user.username });
   } catch (err) {
-    console.error('login', err);
+    console.error('login error', err);
     return res.status(500).json({ error: 'server error' });
   }
 });
 
-// logout
 app.post('/logout', (req, res) => {
   res.clearCookie('user');
   res.json({ status: 'ok' });
 });
 
-// me (validates cookie against DB)
+// validate cookie and return user
 app.get('/me', async (req, res) => {
   try {
     const username = req.cookies.user || null;
@@ -113,12 +114,12 @@ app.get('/me', async (req, res) => {
     }
     return res.json({ user: user.username });
   } catch (err) {
-    console.error('me', err);
+    console.error('me error', err);
     return res.json({ user: null });
   }
 });
 
-// get posts (newest-first)
+// posts
 app.get('/posts', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -128,22 +129,20 @@ app.get('/posts', async (req, res) => {
     if (error) throw error;
     return res.json(data || []);
   } catch (err) {
-    console.error('get posts', err);
+    console.error('get posts error', err);
     return res.status(500).json([]);
   }
 });
 
-// create post (enforce char limit and cooldown)
 app.post('/posts', async (req, res) => {
   try {
     const username = req.cookies.user;
     if (!username) return res.status(401).json({ error: 'not logged in' });
 
-    const content = (req.body && typeof req.body.content === 'string') ? req.body.content.trim() : '';
+    const content = typeof req.body.content === 'string' ? req.body.content.trim() : '';
     if (!content) return res.status(400).json({ error: 'content required' });
     if (content.length > CHAR_LIMIT) return res.status(400).json({ error: `content > ${CHAR_LIMIT} chars` });
 
-    // cooldown: check latest post timestamp for this user
     if (username !== EXEMPT_USERNAME) {
       const lastTs = await getLatestPostTimestamp(username);
       if (lastTs !== null) {
@@ -164,9 +163,14 @@ app.post('/posts', async (req, res) => {
     if (error) throw error;
     return res.json({ post: data });
   } catch (err) {
-    console.error('create post', err);
+    console.error('create post error', err);
     return res.status(500).json({ error: 'server error' });
   }
 });
 
-app.listen(PORT, () => console.log(`blog.js running on ${PORT}`));
+// fallback for unknown routes (serve index for SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => console.log(`server.js running on ${PORT}`));
