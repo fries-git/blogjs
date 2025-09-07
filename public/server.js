@@ -1,117 +1,100 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
-const multer = require('multer');
+const bcrypt = require('bcrypt');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_DIR = __dirname;
-const postsFile = path.join(DATA_DIR, 'posts.json');
-const usersFile = path.join(DATA_DIR, 'users.json');
-const uploadsDir = path.join(DATA_DIR, 'uploads');
 
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const CHAR_LIMIT = 500;
+const COOLDOWN_MS = 15 * 60 * 1000;
+const lastPost = {};
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(DATA_DIR));
-app.use('/uploads', express.static(uploadsDir));
+app.use(express.static(__dirname));
 
-// simple sha256 for demo (not as secure as bcrypt)
-function hashPassword(pw) {
-  return crypto.createHash('sha256').update(pw).digest('hex');
+// hash password
+async function hashPassword(pw) {
+  return bcrypt.hash(pw, 10);
 }
-function readJSON(file) {
-  if (!fs.existsSync(file)) return [];
-  try { return JSON.parse(fs.readFileSync(file)); }
-  catch { return []; }
-}
-function writeJSON(file, obj) {
-  fs.writeFileSync(file, JSON.stringify(obj, null, 2));
+async function checkPassword(pw, hash) {
+  return bcrypt.compare(pw, hash);
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const name = Date.now() + '-' + Math.random().toString(36).slice(2) + ext;
-    cb(null, name);
-  }
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
-
-// auth
-app.post('/signup', (req, res) => {
+// signup
+app.post('/signup', async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: 'username+password required' });
-  const users = readJSON(usersFile);
-  if (users.find(u => u.username === username)) return res.status(400).json({ error: 'user exists' });
-  users.push({ username, password: hashPassword(password) });
-  writeJSON(usersFile, users);
+  if (!username || !password) return res.status(400).json({ error: 'missing fields' });
+
+  const { data: exists } = await supabase.from('users').select().eq('username', username).maybeSingle();
+  if (exists) return res.status(400).json({ error: 'user exists' });
+
+  const pwHash = await hashPassword(password);
+  await supabase.from('users').insert([{ username, password_hash: pwHash }]);
+
   res.cookie('user', username, { httpOnly: true });
   res.json({ status: 'ok' });
 });
 
-app.post('/login', (req, res) => {
+// login
+app.post('/login', async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: 'username+password required' });
-  const users = readJSON(usersFile);
-  const user = users.find(u => u.username === username && u.password === hashPassword(password));
+  const { data: user } = await supabase.from('users').select().eq('username', username).maybeSingle();
   if (!user) return res.status(401).json({ error: 'invalid credentials' });
+
+  const ok = await checkPassword(password, user.password_hash);
+  if (!ok) return res.status(401).json({ error: 'invalid credentials' });
+
   res.cookie('user', username, { httpOnly: true });
   res.json({ status: 'ok' });
 });
 
+// logout
 app.post('/logout', (req, res) => {
   res.clearCookie('user');
   res.json({ status: 'ok' });
 });
 
-// replace existing /me route with this
+// me
 app.get('/me', (req, res) => {
-  const username = req.cookies.user;
-  if (!username) return res.json({ user: null });
-
-  const users = readJSON(usersFile); // uses existing helper
-  const exists = users.find(u => u.username === username);
-  if (exists) return res.json({ user: username });
-
-  // cookie invalid (user deleted or file reset). clear it.
-  res.clearCookie('user');
-  res.json({ user: null });
+  res.json({ user: req.cookies.user || null });
 });
 
-
-// posts
-app.get('/posts', (req, res) => {
-  const posts = readJSON(postsFile);
-  res.json(posts);
+// get posts
+app.get('/posts', async (req, res) => {
+  const { data: posts } = await supabase
+    .from('posts')
+    .select()
+    .order('timestamp', { ascending: false });
+  res.json(posts || []);
 });
 
-// Accept multipart/form-data with optional "image" file and "content" field
-app.post('/posts', upload.single('image'), (req, res) => {
+// new post
+app.post('/posts', async (req, res) => {
   const username = req.cookies.user;
-  if (!username) {
-    // cleanup uploaded file if any
-    if (req.file) fs.unlinkSync(req.file.path);
-    return res.status(401).json({ error: 'not logged in' });
+  if (!username) return res.status(401).json({ error: 'not logged in' });
+
+  const { content } = req.body || {};
+  if (!content || content.length > CHAR_LIMIT) return res.status(400).json({ error: 'too long or empty' });
+
+  const now = Date.now();
+  if (username !== 'fries') {
+    const last = lastPost[username] || 0;
+    if (now - last < COOLDOWN_MS) {
+      return res.status(429).json({ error: 'cooldown active' });
+    }
   }
 
-  const content = req.body.content || '';
-  const posts = readJSON(postsFile);
+  const { data, error } = await supabase.from('posts').insert([{ author: username, content }]).select().single();
+  if (error) return res.status(500).json({ error: error.message });
 
-  const post = {
-    author: username,
-    content,
-    timestamp: new Date().toISOString(),
-    image: req.file ? ('/uploads/' + req.file.filename) : null
-  };
-
-  posts.unshift(post); // newest first
-  writeJSON(postsFile, posts);
-  res.json({ status: 'ok', post });
+  lastPost[username] = now;
+  res.json({ post: data });
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
