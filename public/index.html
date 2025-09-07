@@ -10,28 +10,28 @@
     :root{
       --bg:#0b0f12; --panel:#13181c; --muted:#7a8a99;
       --accent:#7ee7c7; --accent2:#ff9ad0; --ink:#e6eef3;
-      --soft-shadow: 0 10px 30px rgba(47,42,40,0.08);
+      --soft-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#efe7de);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#0b0f12);font-family:Inter,system-ui,Segoe UI,Arial;color:var(--ink)}
     .wrap{max-width:880px;margin:28px auto;padding:20px;display:grid;grid-template-columns:1fr 340px;gap:18px}
     header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
     h1{margin:0;font-size:20px}
     .sub{color:var(--muted);font-size:13px}
-    .card{background:var(--panel);border-radius:12px;padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(0,0,0,0.03)}
+    .card{background:var(--panel);border-radius:12px;padding:14px;box-shadow:var(--soft-shadow);border:1px solid rgba(255,255,255,0.05)}
     /* posts */
     #posts{display:flex;flex-direction:column;gap:12px}
-    .post{padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff6f2);border:1px solid rgba(0,0,0,0.02);animation:lift .28s ease;overflow:hidden}
+    .post{padding:14px;border-radius:12px;background:linear-gradient(180deg,#13181c,#1a2129);border:1px solid rgba(255,255,255,0.03);animation:lift .28s ease;overflow:hidden}
     @keyframes lift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-size:13px}
     .author{font-weight:700;color:var(--accent2)}
     .content{color:var(--ink);line-height:1.5}
     /* auth / composer */
     input, textarea, button{font-family:inherit}
-    input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:#fff}
+    input, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:#1a2129;color:var(--ink)}
     textarea{min-height:92px;resize:vertical}
-    .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#2b1f17;font-weight:700;cursor:pointer}
+    .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;padding:9px 12px;border-radius:10px;color:#0b0f12;font-weight:700;cursor:pointer}
     .muted{color:var(--muted);font-size:13px}
-    .ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:10px;cursor:pointer}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);padding:8px;border-radius:10px;cursor:pointer}
     .cozy {font-size:13px;color:var(--muted)}
     .charcount{font-size:12px;color:var(--muted);text-align:right;margin-top:6px}
     @media (max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}}
